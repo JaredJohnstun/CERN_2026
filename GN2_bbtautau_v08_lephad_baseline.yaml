@@ -1,0 +1,205 @@
+name: GN2_lephad_fold0_inclusive_2459676
+
+
+model:
+  lrs_config:
+    initial: 4.364809689973427e-08
+    max: 0.0017923151488011206
+    end: 1.2426303652891792e-07
+    pct_start: 0.056556319721840824
+    weight_decay: 5.242420527571763e-05
+
+  model:
+    class_path: salt.models.SaltModel
+    init_args:
+      init_nets:
+        - input_name: objects
+          dense_config:
+            output_size: &embed_dim 256
+            hidden_layers: [32, 64]
+            activation: &activation ReLU
+
+      encoder:
+        class_path: salt.models.TransformerEncoder
+        init_args:
+          embed_dim: *embed_dim
+          num_layers: 4
+          out_dim: &out_dim 128
+          mha_config:
+            num_heads: 4
+            attention: { class_path: salt.models.ScaledDotProductAttention }
+          dense_config:
+            activation: *activation
+            dropout: &dropout 0.026335912825285135
+
+
+      pool_net:
+        class_path: salt.models.GlobalAttentionPooling
+        init_args: { input_size: *out_dim}
+
+
+      tasks:
+        class_path: torch.nn.ModuleList
+        init_args:
+          modules:
+            - class_path: salt.models.ClassificationTask
+              init_args:
+                name: events_classification
+                input_name: events
+                label: multiclass_label_bkg_ggFHHSM_VBFHHSM_ggFHHBSM
+                sample_weight: weight_abs
+                class_names: ["B", "SGGF", "SVBF", "SGGFBSM"] 
+                loss:
+                  class_path: torch.nn.CrossEntropyLoss
+                  init_args:
+                    weight:
+                    - 1.0001440203023362
+                    - 17038.3672681654
+                    - 583007.7714671202
+                    - 11962.688256598472
+                    reduction: none
+                dense_config: &task_dense_config
+                  input_size: &task_input_dim 128
+                  output_size: 4
+                  hidden_layers: [128, 64, 32]
+                  activation: *activation
+                  dropout: *dropout
+
+            - class_path: salt.models.ClassificationTask
+              init_args:
+                name: ggFHighMass_sigbkg_classifier
+                input_name: events
+                label: class_label
+                sample_weight: weight_high_mass_region
+                weight: 10.0
+                class_names: ["ggFHighMassB", "ggFHighMassS"] 
+                loss:
+                  class_path: torch.nn.CrossEntropyLoss
+                  init_args: 
+                    weight: [1., 8215.73280389]
+                    reduction: none
+                dense_config:
+                  input_size: *task_input_dim 
+                  output_size: 2
+                  hidden_layers: [128, 64, 32]
+                  activation: *activation
+                  dropout: *dropout
+
+            - class_path: salt.models.ClassificationTask
+              init_args:
+                name: particle_originHiggs
+                input_name: objects
+                label: hasHiggsParent
+                weight: 5.0
+                class_names: ["notHiggsParent", "hasHiggsParent"] 
+                loss:
+                  class_path: torch.nn.CrossEntropyLoss
+                  init_args: { weight: [0.001, 0.001] }
+                dense_config:
+                  input_size: *out_dim # input and context are same size because context is pooled
+                  context_size: *out_dim
+                  output_size: 2
+                  hidden_layers: [128, 64, 32]
+                  activation: *activation
+                  dropout: *dropout
+
+            - class_path: salt.models.ClassificationTask
+              init_args:
+                name: particle_originTop
+                input_name: objects
+                label: hasTopParent
+                weight: 2.0
+                class_names: ["notTopParent", "hasTopParent"] 
+                loss:
+                  class_path: torch.nn.CrossEntropyLoss
+                  init_args: { weight: [0.001, 0.001] }
+                dense_config:
+                  input_size: *out_dim # input and context are same size because context is pooled
+                  context_size: *out_dim
+                  output_size: 2
+                  hidden_layers: [128, 64, 32]
+                  activation: *activation
+                  dropout: *dropout
+
+data:
+  global_object: events
+  input_map:
+    events: events
+    objects: objects
+
+  variables:
+    events:
+      - pTHH
+      - etaHH
+      - mHH
+      - mBB
+      - MET
+      - mjjVBF
+      - dRjjVBF
+        #- dEtajjVBF
+        #- dPhiJJVBF
+      - Eta0Eta1VBF
+      - dRb0tau
+      - dRb1tau
+        #- pTBB
+      - dRBB
+        #- mmc_m
+        #- mmc_pt
+        #- mmc_phi
+        #- mmc_eta
+      - dRTauLep
+      - mbL
+      - mTauTauVis
+      - pTTauTauVis
+      - T1
+        #- n_jets
+      - mTtau0
+      - HT
+        #- fwm0_ttjf
+        #- fwm2_ttjf
+        #- fwm4_ttjf
+        #- mEff_ttjf
+        #- cent_ttjf
+      - dEtaHH
+        #- mTW
+      - dPhiTauTauMET
+      - dRB1Lep0
+        #- b1_gn2
+        #- b2_gn2
+    objects:
+      - eta
+      - phi
+      - m
+      - pt
+      - quant_GN2
+      - isLepton
+      - isTau
+      - isBjet
+      - isJet
+      - isMET
+      - isMMC
+
+  # for 5 fold training, we train on 0-2, val on 3, and test on 4
+  train_file: /eos/atlas/atlaslocalgroupdisk/higgs/HHbbtautau/Run2Run3/MVA/preprocessed_h5/Run2Run3/v08/h5_umich_lephad/fold_0/inclusive_vdsmerged.h5
+  val_file: /eos/atlas/atlaslocalgroupdisk/higgs/HHbbtautau/Run2Run3/MVA/preprocessed_h5/Run2Run3/v08/h5_umich_lephad/fold_3/inclusive.h5
+  norm_dict: /eos/atlas/atlaslocalgroupdisk/higgs/HHbbtautau/Run2Run3/MVA/preprocessed_h5/Run2Run3/v08/h5_umich_lephad/norm_dict_inclusive.yaml
+  class_dict: null
+  batch_size: 1024
+  num_workers: 27
+
+trainer:
+  max_epochs: 30
+  accelerator: gpu
+  devices: 1
+  precision: 32
+  callbacks:
+    - class_path: salt.callbacks.Checkpoint
+      init_args:
+        monitor_loss: val/events_classification_loss
+    - class_path: salt.callbacks.PredictionWriter
+    - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+    - class_path: lightning.pytorch.callbacks.TQDMProgressBar
+      init_args: { refresh_rate: 50 }
+    - class_path: lightning.pytorch.callbacks.ModelSummary
+      init_args: { max_depth: 2 }
+
