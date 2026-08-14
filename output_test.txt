@@ -1,0 +1,546 @@
+(salt) [jjohnstu@shahzad-9 study_dump]$ python compare_gnn_folds.py     --preprocessed /home/shahzad/ML_Fakes_LepHad/inputData/preprocessed
+model fold 0 application pID: min=0.000000, mean=0.084767, std=0.052433, max=0.229711
+model fold 0 calibration pID: min=0.000000, mean=0.084589, std=0.052390, max=0.229673
+
+Category: endc=0, prong=1 | pT = 20-30 GeV
+  Events :   124651
+  FF     : min=0.000001, 5%=0.000001, median=0.060271, mean=0.074062, 95%=0.178428, max=0.244505
+  Spread : std=0.052279
+endc=0, prong=1       20-30    N=  124651 num=   1630.078521 den=  21518.204803 FF=    0.075753
+
+Category: endc=0, prong=1 | pT = 30-40 GeV
+  Events :    72862
+  FF     : min=0.000001, 5%=0.000001, median=0.059581, mean=0.073078, 95%=0.176666, max=0.244762
+  Spread : std=0.051855
+endc=0, prong=1       30-40    N=   72862 num=    970.415126 den=  12740.530229 FF=    0.076168
+
+Category: endc=0, prong=1 | pT = 40-50 GeV
+  Events :    47257
+  FF     : min=0.000001, 5%=0.000001, median=0.059153, mean=0.072875, 95%=0.177153, max=0.244401
+  Spread : std=0.052013
+endc=0, prong=1       40-50    N=   47257 num=    632.912551 den=   8424.040678 FF=    0.075132
+
+Category: endc=0, prong=1 | pT = 50-60 GeV
+  Events :    32693
+  FF     : min=0.000001, 5%=0.000002, median=0.059430, mean=0.072794, 95%=0.175988, max=0.243691
+  Spread : std=0.051336
+endc=0, prong=1       50-60    N=   32693 num=    443.428993 den=   5844.650725 FF=    0.075869
+
+Category: endc=0, prong=1 | pT = 60-80 GeV
+  Events :    40534
+  FF     : min=0.000001, 5%=0.000001, median=0.059876, mean=0.073261, 95%=0.177152, max=0.244690
+  Spread : std=0.051784
+endc=0, prong=1       60-80    N=   40534 num=    535.228540 den=   7071.488860 FF=    0.075688
+
+Category: endc=0, prong=1 | pT = 80-100 GeV
+  Events :    22483
+  FF     : min=0.000001, 5%=0.000001, median=0.058928, mean=0.072617, 95%=0.175865, max=0.243866
+  Spread : std=0.051809
+endc=0, prong=1       80-100   N=   22483 num=    278.874968 den=   3693.520099 FF=    0.075504
+
+Category: endc=0, prong=1 | pT = 100-400 GeV
+  Events :    42590
+  FF     : min=0.000001, 5%=0.000001, median=0.061280, mean=0.074545, 95%=0.176359, max=0.244421
+  Spread : std=0.052186
+endc=0, prong=1      100-400   N=   42590 num=    400.430163 den=   5257.148935 FF=    0.076169
+
+Category: endc=0, prong=3 | pT = 20-30 GeV
+  Events :   148903
+  FF     : min=0.000001, 5%=0.000001, median=0.062086, mean=0.075641, 95%=0.179969, max=0.244594
+  Spread : std=0.052834
+endc=0, prong=3       20-30    N=  148903 num=   2302.886167 den=  30760.821152 FF=    0.074864
+
+Category: endc=0, prong=3 | pT = 30-40 GeV
+  Events :    87095
+  FF     : min=0.000001, 5%=0.000001, median=0.061200, mean=0.074656, 95%=0.178675, max=0.244753
+  Spread : std=0.052500
+endc=0, prong=3       30-40    N=   87095 num=   1502.817979 den=  20066.748074 FF=    0.074891
+
+Category: endc=0, prong=3 | pT = 40-50 GeV
+  Events :    57859
+  FF     : min=0.000001, 5%=0.000001, median=0.060825, mean=0.074199, 95%=0.177364, max=0.244294
+  Spread : std=0.052514
+endc=0, prong=3       40-50    N=   57859 num=   1033.130890 den=  13701.043188 FF=    0.075405
+
+Category: endc=0, prong=3 | pT = 50-60 GeV
+  Events :    41179
+  FF     : min=0.000001, 5%=0.000001, median=0.060580, mean=0.074058, 95%=0.178173, max=0.244264
+  Spread : std=0.052442
+endc=0, prong=3       50-60    N=   41179 num=    726.602162 den=   9757.366500 FF=    0.074467
+
+Category: endc=0, prong=3 | pT = 60-80 GeV
+  Events :    53351
+  FF     : min=0.000001, 5%=0.000001, median=0.060855, mean=0.074429, 95%=0.179552, max=0.244414
+  Spread : std=0.052789
+endc=0, prong=3       60-80    N=   53351 num=    891.766229 den=  11954.001371 FF=    0.074600
+
+Category: endc=0, prong=3 | pT = 80-100 GeV
+  Events :    30958
+  FF     : min=0.000001, 5%=0.000001, median=0.061250, mean=0.074773, 95%=0.177898, max=0.243688
+  Spread : std=0.052592
+endc=0, prong=3       80-100   N=   30958 num=    473.424560 den=   6301.831081 FF=    0.075125
+
+Category: endc=0, prong=3 | pT = 100-400 GeV
+  Events :    60670
+  FF     : min=0.000001, 5%=0.000001, median=0.062596, mean=0.076068, 95%=0.179733, max=0.244517
+  Spread : std=0.052801
+endc=0, prong=3      100-400   N=   60670 num=    643.166273 den=   8625.934696 FF=    0.074562
+
+Category: endc=1, prong=1 | pT = 20-30 GeV
+  Events :    61017
+  FF     : min=0.000001, 5%=0.000001, median=0.061444, mean=0.075240, 95%=0.179481, max=0.244327
+  Spread : std=0.052862
+endc=1, prong=1       20-30    N=   61017 num=    803.987544 den=  10808.558028 FF=    0.074384
+
+Category: endc=1, prong=1 | pT = 30-40 GeV
+  Events :    31079
+  FF     : min=0.000001, 5%=0.000001, median=0.060642, mean=0.074103, 95%=0.178931, max=0.244592
+  Spread : std=0.052584
+endc=1, prong=1       30-40    N=   31079 num=    422.734256 den=   5599.751429 FF=    0.075492
+
+Category: endc=1, prong=1 | pT = 40-50 GeV
+  Events :    19568
+  FF     : min=0.000001, 5%=0.000001, median=0.061558, mean=0.074960, 95%=0.178816, max=0.243807
+  Spread : std=0.052315
+endc=1, prong=1       40-50    N=   19568 num=    270.388860 den=   3554.586376 FF=    0.076068
+
+Category: endc=1, prong=1 | pT = 50-60 GeV
+  Events :    13585
+  FF     : min=0.000001, 5%=0.000001, median=0.060641, mean=0.074458, 95%=0.179903, max=0.243783
+  Spread : std=0.053303
+endc=1, prong=1       50-60    N=   13585 num=    173.744822 den=   2296.985746 FF=    0.075640
+
+Category: endc=1, prong=1 | pT = 60-80 GeV
+  Events :    17420
+  FF     : min=0.000001, 5%=0.000001, median=0.061102, mean=0.074375, 95%=0.177742, max=0.242929
+  Spread : std=0.052222
+endc=1, prong=1       60-80    N=   17420 num=    208.331455 den=   2780.686787 FF=    0.074921
+
+Category: endc=1, prong=1 | pT = 80-100 GeV
+  Events :    10093
+  FF     : min=0.000001, 5%=0.000001, median=0.061644, mean=0.075311, 95%=0.180140, max=0.244672
+  Spread : std=0.053035
+endc=1, prong=1       80-100   N=   10093 num=    109.070932 den=   1458.666611 FF=    0.074774
+
+Category: endc=1, prong=1 | pT = 100-400 GeV
+  Events :    20663
+  FF     : min=0.000001, 5%=0.000001, median=0.062003, mean=0.075491, 95%=0.178548, max=0.244149
+  Spread : std=0.052837
+endc=1, prong=1      100-400   N=   20663 num=    163.212802 den=   2178.951912 FF=    0.074904
+
+Category: endc=1, prong=3 | pT = 20-30 GeV
+  Events :    62403
+  FF     : min=0.000001, 5%=0.000001, median=0.062514, mean=0.075803, 95%=0.179810, max=0.244290
+  Spread : std=0.052758
+endc=1, prong=3       20-30    N=   62403 num=    816.546661 den=  11048.588591 FF=    0.073905
+
+Category: endc=1, prong=3 | pT = 30-40 GeV
+  Events :    35046
+  FF     : min=0.000001, 5%=0.000001, median=0.062300, mean=0.075708, 95%=0.180094, max=0.244242
+  Spread : std=0.052966
+endc=1, prong=3       30-40    N=   35046 num=    499.967064 den=   6668.713982 FF=    0.074972
+
+Category: endc=1, prong=3 | pT = 40-50 GeV
+  Events :    23008
+  FF     : min=0.000001, 5%=0.000001, median=0.062117, mean=0.075442, 95%=0.179773, max=0.242543
+  Spread : std=0.052734
+endc=1, prong=3       40-50    N=   23008 num=    324.507732 den=   4424.025356 FF=    0.073351
+
+Category: endc=1, prong=3 | pT = 50-60 GeV
+  Events :    16829
+  FF     : min=0.000001, 5%=0.000001, median=0.061555, mean=0.075423, 95%=0.179301, max=0.243905
+  Spread : std=0.052675
+endc=1, prong=3       50-60    N=   16829 num=    234.483932 den=   3137.849964 FF=    0.074728
+
+Category: endc=1, prong=3 | pT = 60-80 GeV
+  Events :    22599
+  FF     : min=0.000001, 5%=0.000001, median=0.062170, mean=0.075489, 95%=0.180488, max=0.244052
+  Spread : std=0.053138
+endc=1, prong=3       60-80    N=   22599 num=    294.053399 den=   3962.203476 FF=    0.074215
+
+Category: endc=1, prong=3 | pT = 80-100 GeV
+  Events :    13480
+  FF     : min=0.000001, 5%=0.000001, median=0.061867, mean=0.075343, 95%=0.179371, max=0.242947
+  Spread : std=0.052919
+endc=1, prong=3       80-100   N=   13480 num=    159.711041 den=   2172.767502 FF=    0.073506
+
+Category: endc=1, prong=3 | pT = 100-400 GeV
+  Events :    28845
+  FF     : min=0.000001, 5%=0.000001, median=0.063111, mean=0.076332, 95%=0.179191, max=0.243587
+  Spread : std=0.052816
+endc=1, prong=3      100-400   N=   28845 num=    234.571780 den=   3157.638234 FF=    0.074287
+model fold 0: scale=0.820760 | calibration 20,825.9/17,093.1 | apply closure=0.9932
+model fold 1 application pID: min=0.000000, mean=0.074972, std=0.058837, max=0.207766
+model fold 1 calibration pID: min=0.000000, mean=0.075521, std=0.058894, max=0.207848
+
+Category: endc=0, prong=1 | pT = 20-30 GeV
+  Events :   121269
+  FF     : min=0.000001, 5%=0.000001, median=0.052591, mean=0.075103, 95%=0.215986, max=0.250792
+  Spread : std=0.066204
+endc=0, prong=1       20-30    N=  121269 num=   1543.612957 den=  20625.493301 FF=    0.074840
+
+Category: endc=0, prong=1 | pT = 30-40 GeV
+  Events :    72435
+  FF     : min=0.000001, 5%=0.000001, median=0.051854, mean=0.073752, 95%=0.214038, max=0.250833
+  Spread : std=0.065564
+endc=0, prong=1       30-40    N=   72435 num=    965.261446 den=  13002.886154 FF=    0.074234
+
+Category: endc=0, prong=1 | pT = 40-50 GeV
+  Events :    47654
+  FF     : min=0.000001, 5%=0.000001, median=0.051539, mean=0.073296, 95%=0.213547, max=0.250688
+  Spread : std=0.065266
+endc=0, prong=1       40-50    N=   47654 num=    614.732635 den=   8352.907070 FF=    0.073595
+
+Category: endc=0, prong=1 | pT = 50-60 GeV
+  Events :    33131
+  FF     : min=0.000001, 5%=0.000001, median=0.052365, mean=0.074146, 95%=0.214982, max=0.250726
+  Spread : std=0.065556
+endc=0, prong=1       50-60    N=   33131 num=    436.198368 den=   5819.114978 FF=    0.074960
+
+Category: endc=0, prong=1 | pT = 60-80 GeV
+  Events :    41156
+  FF     : min=0.000001, 5%=0.000001, median=0.051859, mean=0.073322, 95%=0.213773, max=0.250814
+  Spread : std=0.065154
+endc=0, prong=1       60-80    N=   41156 num=    530.562163 den=   7171.670201 FF=    0.073980
+
+Category: endc=0, prong=1 | pT = 80-100 GeV
+  Events :    23181
+  FF     : min=0.000001, 5%=0.000001, median=0.051917, mean=0.073966, 95%=0.213176, max=0.250664
+  Spread : std=0.065517
+endc=0, prong=1       80-100   N=   23181 num=    277.390485 den=   3798.200654 FF=    0.073032
+
+Category: endc=0, prong=1 | pT = 100-400 GeV
+  Events :    44310
+  FF     : min=0.000001, 5%=0.000001, median=0.053718, mean=0.076014, 95%=0.215298, max=0.250263
+  Spread : std=0.066302
+endc=0, prong=1      100-400   N=   44310 num=    406.637080 den=   5373.610703 FF=    0.075673
+
+Category: endc=0, prong=3 | pT = 20-30 GeV
+  Events :   143204
+  FF     : min=0.000001, 5%=0.000001, median=0.054033, mean=0.077279, 95%=0.217751, max=0.250762
+  Spread : std=0.067307
+endc=0, prong=3       20-30    N=  143204 num=   2258.553107 den=  30186.935618 FF=    0.074819
+
+Category: endc=0, prong=3 | pT = 30-40 GeV
+  Events :    86841
+  FF     : min=0.000001, 5%=0.000001, median=0.053429, mean=0.076393, 95%=0.217380, max=0.250852
+  Spread : std=0.066993
+endc=0, prong=3       30-40    N=   86841 num=   1505.470252 den=  20357.002136 FF=    0.073953
+
+Category: endc=0, prong=3 | pT = 40-50 GeV
+  Events :    58212
+  FF     : min=0.000001, 5%=0.000001, median=0.052977, mean=0.075845, 95%=0.216765, max=0.250092
+  Spread : std=0.066884
+endc=0, prong=3       40-50    N=   58212 num=   1027.614113 den=  13903.859870 FF=    0.073909
+
+Category: endc=0, prong=3 | pT = 50-60 GeV
+  Events :    42676
+  FF     : min=0.000001, 5%=0.000001, median=0.053018, mean=0.075714, 95%=0.215717, max=0.250335
+  Spread : std=0.066577
+endc=0, prong=3       50-60    N=   42676 num=    752.351645 den=  10127.903437 FF=    0.074285
+
+Category: endc=0, prong=3 | pT = 60-80 GeV
+  Events :    55504
+  FF     : min=0.000001, 5%=0.000001, median=0.052961, mean=0.075680, 95%=0.216767, max=0.250240
+  Spread : std=0.066720
+endc=0, prong=3       60-80    N=   55504 num=    911.313370 den=  12321.351760 FF=    0.073962
+
+Category: endc=0, prong=3 | pT = 80-100 GeV
+  Events :    32273
+  FF     : min=0.000001, 5%=0.000001, median=0.053199, mean=0.075977, 95%=0.216430, max=0.250015
+  Spread : std=0.066691
+endc=0, prong=3       80-100   N=   32273 num=    487.150159 den=   6598.759413 FF=    0.073825
+
+Category: endc=0, prong=3 | pT = 100-400 GeV
+  Events :    63784
+  FF     : min=0.000001, 5%=0.000001, median=0.054355, mean=0.077438, 95%=0.217626, max=0.250332
+  Spread : std=0.067324
+endc=0, prong=3      100-400   N=   63784 num=    641.387920 den=   8711.996400 FF=    0.073621
+
+Category: endc=1, prong=1 | pT = 20-30 GeV
+  Events :    59195
+  FF     : min=0.000001, 5%=0.000001, median=0.053653, mean=0.076476, 95%=0.216457, max=0.250950
+  Spread : std=0.066691
+endc=1, prong=1       20-30    N=   59195 num=    773.308350 den=  10426.367225 FF=    0.074169
+
+Category: endc=1, prong=1 | pT = 30-40 GeV
+  Events :    30748
+  FF     : min=0.000001, 5%=0.000001, median=0.053682, mean=0.076174, 95%=0.216442, max=0.250437
+  Spread : std=0.066707
+endc=1, prong=1       30-40    N=   30748 num=    418.562609 den=   5597.676451 FF=    0.074774
+
+Category: endc=1, prong=1 | pT = 40-50 GeV
+  Events :    19590
+  FF     : min=0.000001, 5%=0.000001, median=0.053445, mean=0.075856, 95%=0.216546, max=0.250853
+  Spread : std=0.066416
+endc=1, prong=1       40-50    N=   19590 num=    258.331426 den=   3469.404775 FF=    0.074460
+
+Category: endc=1, prong=1 | pT = 50-60 GeV
+  Events :    13791
+  FF     : min=0.000001, 5%=0.000001, median=0.053087, mean=0.075671, 95%=0.217709, max=0.249177
+  Spread : std=0.066735
+endc=1, prong=1       50-60    N=   13791 num=    172.194947 den=   2382.384110 FF=    0.072278
+
+Category: endc=1, prong=1 | pT = 60-80 GeV
+  Events :    17842
+  FF     : min=0.000001, 5%=0.000001, median=0.053191, mean=0.075789, 95%=0.218308, max=0.250607
+  Spread : std=0.066864
+endc=1, prong=1       60-80    N=   17842 num=    206.757639 den=   2859.520071 FF=    0.072305
+
+Category: endc=1, prong=1 | pT = 80-100 GeV
+  Events :    10206
+  FF     : min=0.000001, 5%=0.000001, median=0.052655, mean=0.075068, 95%=0.216217, max=0.250231
+  Spread : std=0.066594
+endc=1, prong=1       80-100   N=   10206 num=    107.121985 den=   1514.249903 FF=    0.070743
+
+Category: endc=1, prong=1 | pT = 100-400 GeV
+  Events :    21472
+  FF     : min=0.000001, 5%=0.000001, median=0.054749, mean=0.077242, 95%=0.216620, max=0.250770
+  Spread : std=0.066772
+endc=1, prong=1      100-400   N=   21472 num=    171.465682 den=   2339.360678 FF=    0.073296
+
+Category: endc=1, prong=3 | pT = 20-30 GeV
+  Events :    59492
+  FF     : min=0.000001, 5%=0.000001, median=0.054889, mean=0.077957, 95%=0.217844, max=0.250037
+  Spread : std=0.067427
+endc=1, prong=3       20-30    N=   59492 num=    801.463921 den=  10851.547484 FF=    0.073857
+
+Category: endc=1, prong=3 | pT = 30-40 GeV
+  Events :    34557
+  FF     : min=0.000001, 5%=0.000001, median=0.054110, mean=0.077273, 95%=0.217755, max=0.250777
+  Spread : std=0.067213
+endc=1, prong=3       30-40    N=   34557 num=    475.895698 den=   6589.501450 FF=    0.072220
+
+Category: endc=1, prong=3 | pT = 40-50 GeV
+  Events :    23474
+  FF     : min=0.000001, 5%=0.000001, median=0.054384, mean=0.077043, 95%=0.217105, max=0.250824
+  Spread : std=0.066845
+endc=1, prong=3       40-50    N=   23474 num=    338.614675 den=   4601.869529 FF=    0.073582
+
+Category: endc=1, prong=3 | pT = 50-60 GeV
+  Events :    17356
+  FF     : min=0.000001, 5%=0.000001, median=0.053236, mean=0.076711, 95%=0.216960, max=0.250445
+  Spread : std=0.067169
+endc=1, prong=3       50-60    N=   17356 num=    240.664195 den=   3306.498654 FF=    0.072785
+
+Category: endc=1, prong=3 | pT = 60-80 GeV
+  Events :    23148
+  FF     : min=0.000001, 5%=0.000001, median=0.053908, mean=0.076908, 95%=0.217150, max=0.250200
+  Spread : std=0.067169
+endc=1, prong=3       60-80    N=   23148 num=    299.082912 den=   4040.966913 FF=    0.074013
+
+Category: endc=1, prong=3 | pT = 80-100 GeV
+  Events :    13865
+  FF     : min=0.000001, 5%=0.000001, median=0.053550, mean=0.076717, 95%=0.217096, max=0.250229
+  Spread : std=0.067175
+endc=1, prong=3       80-100   N=   13865 num=    159.306372 den=   2138.222997 FF=    0.074504
+
+Category: endc=1, prong=3 | pT = 100-400 GeV
+  Events :    30289
+  FF     : min=0.000001, 5%=0.000001, median=0.054942, mean=0.078431, 95%=0.218275, max=0.250337
+  Spread : std=0.067672
+endc=1, prong=3      100-400   N=   30289 num=    248.612626 den=   3310.371522 FF=    0.075101
+model fold 1: scale=0.957553 | calibration 18,065.0/17,298.2 | apply closure=0.9760
+model fold 2 application pID: min=0.000000, mean=0.076682, std=0.056829, max=0.238024
+model fold 2 calibration pID: min=0.000000, mean=0.076359, std=0.056877, max=0.237846
+
+Category: endc=0, prong=1 | pT = 20-30 GeV
+  Events :   122785
+  FF     : min=0.000001, 5%=0.000001, median=0.056121, mean=0.077857, 95%=0.210864, max=0.303554
+  Spread : std=0.066775
+endc=0, prong=1       20-30    N=  122785 num=   1617.500648 den=  21237.956750 FF=    0.076161
+
+Category: endc=0, prong=1 | pT = 30-40 GeV
+  Events :    73203
+  FF     : min=0.000001, 5%=0.000001, median=0.055704, mean=0.076840, 95%=0.210614, max=0.302236
+  Spread : std=0.066674
+endc=0, prong=1       30-40    N=   73203 num=   1002.409230 den=  13163.222929 FF=    0.076152
+
+Category: endc=0, prong=1 | pT = 40-50 GeV
+  Events :    47701
+  FF     : min=0.000001, 5%=0.000001, median=0.054407, mean=0.075815, 95%=0.209548, max=0.305089
+  Spread : std=0.066281
+endc=0, prong=1       40-50    N=   47701 num=    635.583520 den=   8393.481911 FF=    0.075723
+
+Category: endc=0, prong=1 | pT = 50-60 GeV
+  Events :    33010
+  FF     : min=0.000001, 5%=0.000001, median=0.055187, mean=0.076236, 95%=0.210641, max=0.302115
+  Spread : std=0.066629
+endc=0, prong=1       50-60    N=   33010 num=    444.277180 den=   5792.285627 FF=    0.076702
+
+Category: endc=0, prong=1 | pT = 60-80 GeV
+  Events :    40587
+  FF     : min=0.000001, 5%=0.000001, median=0.055280, mean=0.076545, 95%=0.209606, max=0.297331
+  Spread : std=0.066384
+endc=0, prong=1       60-80    N=   40587 num=    543.923949 den=   6966.831598 FF=    0.078073
+
+Category: endc=0, prong=1 | pT = 80-100 GeV
+  Events :    22682
+  FF     : min=0.000001, 5%=0.000001, median=0.056380, mean=0.076941, 95%=0.209875, max=0.301442
+  Spread : std=0.066363
+endc=0, prong=1       80-100   N=   22682 num=    280.380204 den=   3590.772492 FF=    0.078084
+
+Category: endc=0, prong=1 | pT = 100-400 GeV
+  Events :    42600
+  FF     : min=0.000001, 5%=0.000001, median=0.057443, mean=0.079210, 95%=0.212427, max=0.304831
+  Spread : std=0.067422
+endc=0, prong=1      100-400   N=   42600 num=    394.888454 den=   5094.274742 FF=    0.077516
+
+Category: endc=0, prong=3 | pT = 20-30 GeV
+  Events :   145600
+  FF     : min=0.000001, 5%=0.000001, median=0.058394, mean=0.080227, 95%=0.213282, max=0.304874
+  Spread : std=0.067706
+endc=0, prong=3       20-30    N=  145600 num=   2336.494666 den=  30514.823892 FF=    0.076569
+
+Category: endc=0, prong=3 | pT = 30-40 GeV
+  Events :    88228
+  FF     : min=0.000001, 5%=0.000001, median=0.058269, mean=0.080103, 95%=0.213158, max=0.301140
+  Spread : std=0.067770
+endc=0, prong=3       30-40    N=   88228 num=   1564.556460 den=  20257.024245 FF=    0.077235
+
+Category: endc=0, prong=3 | pT = 40-50 GeV
+  Events :    58318
+  FF     : min=0.000001, 5%=0.000001, median=0.057234, mean=0.079200, 95%=0.212319, max=0.303754
+  Spread : std=0.067502
+endc=0, prong=3       40-50    N=   58318 num=   1062.915791 den=  13830.688114 FF=    0.076852
+
+Category: endc=0, prong=3 | pT = 50-60 GeV
+  Events :    42307
+  FF     : min=0.000001, 5%=0.000001, median=0.057814, mean=0.079044, 95%=0.211262, max=0.304336
+  Spread : std=0.067130
+endc=0, prong=3       50-60    N=   42307 num=    762.057841 den=   9997.922498 FF=    0.076222
+
+Category: endc=0, prong=3 | pT = 60-80 GeV
+  Events :    54339
+  FF     : min=0.000001, 5%=0.000001, median=0.057472, mean=0.078980, 95%=0.212847, max=0.299148
+  Spread : std=0.067519
+endc=0, prong=3       60-80    N=   54339 num=    925.865415 den=  12087.696841 FF=    0.076596
+
+Category: endc=0, prong=3 | pT = 80-100 GeV
+  Events :    31331
+  FF     : min=0.000001, 5%=0.000001, median=0.057505, mean=0.079163, 95%=0.211972, max=0.303099
+  Spread : std=0.067475
+endc=0, prong=3       80-100   N=   31331 num=    493.679631 den=   6448.268238 FF=    0.076560
+
+Category: endc=0, prong=3 | pT = 100-400 GeV
+  Events :    61126
+  FF     : min=0.000001, 5%=0.000001, median=0.059052, mean=0.081179, 95%=0.214315, max=0.298915
+  Spread : std=0.068292
+endc=0, prong=3      100-400   N=   61126 num=    657.174204 den=   8646.881381 FF=    0.076001
+
+Category: endc=1, prong=1 | pT = 20-30 GeV
+  Events :    59912
+  FF     : min=0.000001, 5%=0.000001, median=0.058108, mean=0.080126, 95%=0.213435, max=0.302016
+  Spread : std=0.067763
+endc=1, prong=1       20-30    N=   59912 num=    801.187669 den=  10407.268418 FF=    0.076983
+
+Category: endc=1, prong=1 | pT = 30-40 GeV
+  Events :    31252
+  FF     : min=0.000001, 5%=0.000001, median=0.057159, mean=0.079164, 95%=0.213293, max=0.304520
+  Spread : std=0.067783
+endc=1, prong=1       30-40    N=   31252 num=    426.406830 den=   5576.577381 FF=    0.076464
+
+Category: endc=1, prong=1 | pT = 40-50 GeV
+  Events :    19823
+  FF     : min=0.000001, 5%=0.000001, median=0.056919, mean=0.078623, 95%=0.211633, max=0.299532
+  Spread : std=0.067479
+endc=1, prong=1       40-50    N=   19823 num=    266.111969 den=   3499.792373 FF=    0.076037
+
+Category: endc=1, prong=1 | pT = 50-60 GeV
+  Events :    13630
+  FF     : min=0.000001, 5%=0.000001, median=0.058091, mean=0.079147, 95%=0.210600, max=0.298340
+  Spread : std=0.067694
+endc=1, prong=1       50-60    N=   13630 num=    176.624016 den=   2302.973379 FF=    0.076694
+
+Category: endc=1, prong=1 | pT = 60-80 GeV
+  Events :    17863
+  FF     : min=0.000001, 5%=0.000001, median=0.056892, mean=0.078959, 95%=0.212781, max=0.299463
+  Spread : std=0.067693
+endc=1, prong=1       60-80    N=   17863 num=    228.635614 den=   2915.615589 FF=    0.078418
+
+Category: endc=1, prong=1 | pT = 80-100 GeV
+  Events :    10301
+  FF     : min=0.000001, 5%=0.000001, median=0.056472, mean=0.078412, 95%=0.212858, max=0.296926
+  Spread : std=0.067677
+endc=1, prong=1       80-100   N=   10301 num=    113.906638 den=   1496.467982 FF=    0.076117
+
+Category: endc=1, prong=1 | pT = 100-400 GeV
+  Events :    20573
+  FF     : min=0.000001, 5%=0.000001, median=0.058436, mean=0.080878, 95%=0.213243, max=0.304794
+  Spread : std=0.068223
+endc=1, prong=1      100-400   N=   20573 num=    155.820439 den=   2125.153921 FF=    0.073322
+
+Category: endc=1, prong=3 | pT = 20-30 GeV
+  Events :    60851
+  FF     : min=0.000001, 5%=0.000001, median=0.059811, mean=0.081686, 95%=0.213866, max=0.304093
+  Spread : std=0.067983
+endc=1, prong=3       20-30    N=   60851 num=    865.456649 den=  11134.343187 FF=    0.077729
+
+Category: endc=1, prong=3 | pT = 30-40 GeV
+  Events :    35582
+  FF     : min=0.000001, 5%=0.000001, median=0.058713, mean=0.080649, 95%=0.213325, max=0.301315
+  Spread : std=0.067945
+endc=1, prong=3       30-40    N=   35582 num=    511.012901 den=   6614.562454 FF=    0.077256
+
+Category: endc=1, prong=3 | pT = 40-50 GeV
+  Events :    23702
+  FF     : min=0.000001, 5%=0.000001, median=0.058541, mean=0.080165, 95%=0.212559, max=0.301146
+  Spread : std=0.067386
+endc=1, prong=3       40-50    N=   23702 num=    353.326866 den=   4611.502865 FF=    0.076619
+
+Category: endc=1, prong=3 | pT = 50-60 GeV
+  Events :    17238
+  FF     : min=0.000001, 5%=0.000001, median=0.058297, mean=0.080459, 95%=0.213806, max=0.290668
+  Spread : std=0.068085
+endc=1, prong=3       50-60    N=   17238 num=    246.341016 den=   3165.404254 FF=    0.077823
+
+Category: endc=1, prong=3 | pT = 60-80 GeV
+  Events :    22851
+  FF     : min=0.000001, 5%=0.000001, median=0.058905, mean=0.080896, 95%=0.213715, max=0.301552
+  Spread : std=0.068124
+endc=1, prong=3       60-80    N=   22851 num=    315.753339 den=   4096.380829 FF=    0.077081
+
+Category: endc=1, prong=3 | pT = 80-100 GeV
+  Events :    13703
+  FF     : min=0.000001, 5%=0.000001, median=0.058005, mean=0.080038, 95%=0.211859, max=0.300602
+  Spread : std=0.067784
+endc=1, prong=3       80-100   N=   13703 num=    163.743804 den=   2159.991337 FF=    0.075808
+
+Category: endc=1, prong=3 | pT = 100-400 GeV
+  Events :    29029
+  FF     : min=0.000001, 5%=0.000001, median=0.059640, mean=0.081511, 95%=0.213282, max=0.300970
+  Spread : std=0.067818
+endc=1, prong=3      100-400   N=   29029 num=    235.818964 den=   3145.741292 FF=    0.074965
+model fold 2: scale=0.976668 | calibration 17,864.6/17,447.8 | apply closure=1.0286
+
+Calibrated GNN fake factor by category and tau-pT bin
+category                pT bin  model fold 0  model fold 1  model fold 2       std dev
+--------------------------------------------------------------------------------------
+Barrel 1-prong       20-30           0.07575       0.07484       0.07616       0.00068
+Barrel 1-prong       30-40           0.07617       0.07423       0.07615       0.00111
+Barrel 1-prong       40-50           0.07513       0.07360       0.07572       0.00110
+Barrel 1-prong       50-60           0.07587       0.07496       0.07670       0.00087
+Barrel 1-prong       60-80           0.07569       0.07398       0.07807       0.00206
+Barrel 1-prong       80-100          0.07550       0.07303       0.07808       0.00253
+Barrel 1-prong      100-400          0.07617       0.07567       0.07752       0.00095
+Barrel 3-prong       20-30           0.07486       0.07482       0.07657       0.00100
+Barrel 3-prong       30-40           0.07489       0.07395       0.07724       0.00169
+Barrel 3-prong       40-50           0.07541       0.07391       0.07685       0.00147
+Barrel 3-prong       50-60           0.07447       0.07429       0.07622       0.00107
+Barrel 3-prong       60-80           0.07460       0.07396       0.07660       0.00137
+Barrel 3-prong       80-100          0.07512       0.07382       0.07656       0.00137
+Barrel 3-prong      100-400          0.07456       0.07362       0.07600       0.00120
+Endcap 1-prong       20-30           0.07438       0.07417       0.07698       0.00157
+Endcap 1-prong       30-40           0.07549       0.07477       0.07646       0.00085
+Endcap 1-prong       40-50           0.07607       0.07446       0.07604       0.00092
+Endcap 1-prong       50-60           0.07564       0.07228       0.07669       0.00231
+Endcap 1-prong       60-80           0.07492       0.07231       0.07842       0.00307
+Endcap 1-prong       80-100          0.07477       0.07074       0.07612       0.00280
+Endcap 1-prong      100-400          0.07490       0.07330       0.07332       0.00092
+Endcap 3-prong       20-30           0.07391       0.07386       0.07773       0.00222
+Endcap 3-prong       30-40           0.07497       0.07222       0.07726       0.00252
+Endcap 3-prong       40-50           0.07335       0.07358       0.07662       0.00182
+Endcap 3-prong       50-60           0.07473       0.07279       0.07782       0.00254
+Endcap 3-prong       60-80           0.07421       0.07401       0.07708       0.00172
+Endcap 3-prong       80-100          0.07351       0.07450       0.07581       0.00115
+Endcap 3-prong      100-400          0.07429       0.07510       0.07496       0.00044

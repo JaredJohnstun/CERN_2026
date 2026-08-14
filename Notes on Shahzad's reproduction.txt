@@ -1,0 +1,687 @@
+Notes on Shahzad's reproduction:
+
+8/12/2026:
+
+command on using python {PP} doesn't work
+ -python doesn't see bash environment variable, command needs slight tweak
+
+S1 Sentence(s):
+The signed fake factor weights are subtracting the simulated data that you don't want contributing to your results, so positive weights are for real data and negative weights are for simulated data. The Fake Factor is the ratio of ID yields to anti-ID yields because it yields a mapping of the antiID fake yields onto the ID region. In other words, it is a prediction of how many fake taus may end up in the ID region.
+
+S2:
+As an aside: Difference in training files:
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ diff -u \
+configs/GN2_bbtautau_fakeFactor_lephad_fold0.yaml \
+configs/GN2_softmask_lephad_fold0.yaml
+--- configs/GN2_bbtautau_fakeFactor_lephad_fold0.yaml   2026-08-10 23:42:03.422313922 +0200
++++ configs/GN2_softmask_lephad_fold0.yaml      2026-08-10 23:42:03.422313922 +0200
+@@ -18,7 +18,7 @@
+ # Built from GN2_bbtautau_v08_lephad_baseline.yaml, stripped to one task
+ # and to data-safe inputs (no MC-truth parentage, no truth_type as input).
+ # =====================================================================
+-name: GN2_fakeFactor_lephad_fold0
++name: GN2_softmask_lephad_fold0
+
+ model:
+   lrs_config:
+@@ -64,13 +64,27 @@
+                 name: fakefactor_classifier
+                 input_name: events
+                 label: is_idfake                 # TA -> 0 (anti-ID), TL -> 1 (ID)
+-                # RESIDUAL TRAINING: the anti-ID side is pre-scaled by
+-                # FF_binned(pt,eta,prong), so the odds are the CORRECTION r(x) ~ 1,
+-                # not the full fake factor. Apply as FF(x) = FF_binned * r(x).
+-                # Built by python/make_residual_weights.py. Use fakefactor_weight
+-                # instead to go back to training the full FF.
+-                sample_weight: residual_weight_m0
++                # SOFT-MASK TRAINING: data-only, positive weights. Each data
++                # event carries cw*(1-rho(x)) with rho = P(real/e-fake tau | x);
++                # simulation is weight 0 (dropped). All weights >= 0 -> the loss is
++                # bounded -> no divergence, and the fake factor is fully data-driven
++                # with NO binned FF anchor. Odds p/(1-p) are the fake factor directly
++                # (evaluate WITHOUT --residual-col). Built by
++                # python/make_softmask_weights.py.
++                sample_weight: softmask_weight
+                 class_names: ["antiID", "ID"]
++                # DBI ratio-step regularisation: penalise large log-odds = log(FF),
++                # i.e. exploding fake factors in sparse regions (the high-pT tail
++                # that blows up without an FF anchor). Applied UNWEIGHTED in
++                # ClassificationTask so it constrains the low-stat tails.
++                # arXiv:2511.06972 Eq. (12). DISABLED (0.0): with FF~0.1 the
++                # log-odds ~ -2.3, so penalising log_odds^2 fights the FF's LEVEL
++                # and flattens its SHAPE (lambda=0.01 collapsed FF to ~constant,
++                # tau_pt RMS 0.127->4.56, lost 8/8 composition vars, 2026-07-31).
++                # The tau_pt weakness is UNDER-fitting the falloff, not an
++                # exploding tail, so regularising pushes the wrong way. Kept the
++                # knob for reference only; leave at 0.0.
++                logit_l2_reg: 0.0
+                 loss:
+                   class_path: torch.nn.CrossEntropyLoss
+                   init_args:
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$
+
+the softmask approach gives the data event a fractional weight representing how much it should contribute to the fake population.
+
+Also, running this:
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ MODE=softmask EPOCHS=20 ./python/run_fold.sh 0
+
+yields this:
+
+=== fold 0 [softmask] : train fold_0 | calibrate fold_1 | apply fold_2 ===
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/lightning/fabric/__init__.py:40: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+usage: salt [-h] [-c CONFIG] [--print_config[=flags]] {fit,validate,test,predict} ...
+error: Parser key "model.model":
+  Problem with given class_path 'salt.models.SaltModel':
+    Parser key "tasks":
+      Problem with given class_path 'torch.nn.ModuleList':
+        Parser key "modules":
+          Does not validate against any of the Union subtypes
+          Subtypes: (typing.Iterable[torch.nn.modules.module.Module], <class 'NoneType'>)
+          Errors:
+            - Problem with given class_path 'salt.models.ClassificationTask':
+                Validation failed: Key 'logit_l2_reg' is not expected
+            - Expected a <class 'NoneType'>
+          Given value type: <class 'list'>
+          Given value: [Namespace(class_path='salt.models.ClassificationTask', init_args=Namespace(label='is_idfake', class_names=['antiID', 'ID'], label_map=None, sample_weight='softmask_weight', use_class_dict=False, name='fakefactor_classifier', input_name='events', dense_config={'input_size': 128, 'output_size': 2, 'hidden_layers': [128, 64, 32], 'activation': 'ReLU', 'dropout': 0.03}, loss=Namespace(class_path='torch.nn.CrossEntropyLoss', init_args=Namespace(weight=tensor([1., 1.]), size_average=None, ignore_index=-100, reduce=None, reduction='none', label_smoothing=0.0)), weight=1.0, logit_l2_reg=0.0))]
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$
+
+so that doesn't work. Seems that the Yaml config file contains the new logit_12_reg option but SALT doesn't have it as a valid argument.
+
+Fix: go into file GN2_softmask_lephad_fold0.yaml (or fold 1 or 2 depending on which fold you train on), and comment out the line that reads the logit_12_reg value, it's right under the docstring about the softmask
+
+
+Total fold 0 output:
+
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ MODE=softmask EPOCHS=20 ./python/run_fold.sh 0
+=== fold 0 [softmask] : train fold_0 | calibrate fold_1 | apply fold_2 ===
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/lightning/fabric/__init__.py:40: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+Seed set to 42
+CometLogger will be initialized in online mode
+Trainer already configured with model summary callbacks: [<class 'lightning.pytorch.callbacks.model_summary.ModelSummary'>]. Skipping setting a default `ModelSummary` callback.
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+COMET INFO: Experiment is live on comet.com https://www.comet.com/hh-bbtautau-gnn/salt/3dfe6312f5fb4884bf65d6bd1aa0ea9c
+
+----------------------------------------------------------------------------------------------------
+Created training dataset with 2,322,744 entries
+Created validation dataset with 2,323,454 entries
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+Created output dir /home/jjohnstu/summer_2026/fakes-ml-toolkit/logs/GN2_softmask_lephad_fold0_20260813-T004341
+----------------------------------------------------------------------------------------------------
+
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Loading `train_dataloader` to estimate number of stepping batches.
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+
+  | Name            | Type                   | Params
+-----------------------------------------------------------
+0 | model           | SaltModel              | 2.2 M
+1 | model.init_nets | ModuleList             | 20.0 K
+2 | model.tasks     | ModuleList             | 26.9 K
+3 | model.encoder   | TransformerEncoder     | 2.1 M
+4 | model.pool_net  | GlobalAttentionPooling | 129
+5 | norm            | InputNorm              | 0
+-----------------------------------------------------------
+2.2 M     Trainable params
+0         Non-trainable params
+2.2 M     Total params
+8.756     Total estimated model params size (MB)
+Epoch 0: 100%|██████████████████████████████████████████████████████████████████████████████████| 2268/2268 [01:20<00:00, 28.34it/s, v_num=ea9c]/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+Epoch 19: 100%|█████████████████████████████████████████████████████████████████████████████████| 2268/2268 [01:45<00:00, 21.48it/s, v_num=ea9c]`Trainer.fit` stopped: `max_epochs=20` reached.
+Epoch 19: 100%|█████████████████████████████████████████████████████████████████████████████████| 2268/2268 [01:45<00:00, 21.47it/s, v_num=ea9c]
+run dir: logs/GN2_softmask_lephad_fold0_20260813-T004341
+checkpoint: epoch=015-val_loss=0.02397.ckpt
+
+--- closure (apply fold 2, calibrated on fold 1) ---
+loaded 2,320,993 events from 1 file(s)
+calibration fold: predicted 17,239.2  actual 17,093.1  -> global FF scale = 0.9915
+  (one number, fitted off the apply fold; the SHAPE is untouched)
+
+  category             ptbin  binnedFF    gnnFF   ratio
+  Barrel 1-prong     20-  30     0.205    0.208    1.01
+  Barrel 1-prong     30-  40     0.148    0.144    0.97
+  Barrel 1-prong     40-  50     0.095    0.100    1.05
+  Barrel 1-prong     50-  60     0.070    0.074    1.05
+  Barrel 1-prong     60-  80     0.062    0.054    0.88
+  Barrel 1-prong     80- 100     0.040    0.041    1.00
+  Barrel 1-prong    100- 400     0.016    0.022    1.31
+  Barrel 3-prong     20-  30     0.067    0.070    1.04
+  Barrel 3-prong     30-  40     0.060    0.052    0.87
+  Barrel 3-prong     40-  50     0.038    0.037    0.98
+  Barrel 3-prong     50-  60     0.027    0.025    0.95
+  Barrel 3-prong     60-  80     0.019    0.016    0.83
+  Barrel 3-prong     80- 100     0.008    0.009    1.10
+  Barrel 3-prong    100- 400    -0.004    0.004   -0.89
+  Endcap 1-prong     20-  30     0.197    0.187    0.95
+  Endcap 1-prong     30-  40     0.139    0.128    0.92
+  Endcap 1-prong     40-  50     0.092    0.091    0.98
+  Endcap 1-prong     50-  60     0.059    0.065    1.12
+  Endcap 1-prong     60-  80     0.043    0.046    1.05
+  Endcap 1-prong     80- 100     0.013    0.031    2.32
+  Endcap 1-prong    100- 400     0.016    0.017    1.06
+  Endcap 3-prong     20-  30     0.067    0.064    0.96
+  Endcap 3-prong     30-  40     0.044    0.047    1.08
+  Endcap 3-prong     40-  50     0.029    0.033    1.11
+  Endcap 3-prong     50-  60     0.021    0.023    1.12
+  Endcap 3-prong     60-  80     0.008    0.014    1.87
+  Endcap 3-prong     80- 100     0.002    0.008    4.69
+  Endcap 3-prong    100- 400     0.006    0.003    0.49
+
+  INCLUSIVE closure      predicted   17,204.2   actual   17,298.2   ratio  0.995
+
+  wrote fakefactor_closure_out/fold0/fakefactor_closure_salt_calibrated.png
+
+--- benchmark vs the binned FF ---
+train 2,322,744   calib 2,323,454   apply 2,320,993
+global scale from the validation fold:  binned 0.9707   GNN 0.9915
+  (one constant each, fitted off the apply fold -- shapes untouched)
+
+           INCLUSIVE    actual      binned         GNN
+                        17,298       0.993       0.995
+
+========================================================================
+HOME TURF of the binned method -- it is exact here by construction.
+========================================================================
+
+  --- tau_pt (the binned FF's own axis) ---
+                   bin    actual      binned         GNN
+         20-30             9,349       1.016       1.000
+         30-40             4,150       0.936       0.943
+         40-50             1,780       1.029       1.022
+         50-60               873       1.112       1.034
+         60-80               818       0.789       0.928
+         80-100              224       1.121       1.199
+        100-400              108       0.809       1.759
+         RMS deviation                 0.127       0.299
+
+========================================================================
+THE REAL TEST -- variables the binned FF does NOT use.
+A flat column of 1.000 means the method models the fake factor's
+dependence on that variable. The binned method cannot: adding an axis
+would multiply its bins and destroy its statistics.
+========================================================================
+
+  --- mbL ---
+                   bin    actual      binned         GNN
+         20-97             4,667       1.004       1.038
+         97-116            4,669       0.924       0.949
+        116-136            4,137       0.955       0.980
+        136-191            2,885       1.040       1.009
+        191-2923             940       1.296       1.022
+         RMS deviation                 0.139       0.032
+
+  --- T1 ---
+                   bin    actual      binned         GNN
+        -25--12            4,917       0.935       0.985
+        -12--9             4,528       0.979       1.034
+         -9-9              4,136       0.961       0.949
+          9-13             2,798       1.072       1.012
+         13-25               919       1.269       1.002
+         RMS deviation                 0.130       0.029
+
+  --- mTtau0 ---
+                   bin    actual      binned         GNN
+          0-20             3,695       0.898       1.037
+         20-39             3,902       0.920       0.956
+         39-60             4,007       0.987       0.953
+         60-90             3,646       1.102       1.021
+         90-1943           2,048       1.117       1.027
+         RMS deviation                 0.091       0.037
+
+  --- MET ---
+                   bin    actual      binned         GNN
+          0-29             4,080       0.975       0.967
+         29-45             4,251       0.968       0.959
+         45-63             4,008       0.971       0.978
+         63-90             3,176       1.000       1.026
+         90-2281           1,784       1.130       1.123
+         RMS deviation                 0.062       0.062
+
+  --- HT ---
+                   bin    actual      binned         GNN
+        128-301            4,044       1.091       1.014
+        301-379            4,870       0.965       0.945
+        379-477            4,026       0.958       0.994
+        477-649            2,882       0.979       1.055
+        649-7133           1,476       0.937       0.990
+         RMS deviation                 0.056       0.036
+
+  --- mBB ---
+                   bin    actual      binned         GNN
+        150-175            3,998       0.996       0.965
+        175-208            3,675       1.051       1.034
+        208-254            3,769       0.970       0.969
+        254-338            3,300       1.008       1.043
+        338-7354           2,556       0.917       0.959
+         RMS deviation                 0.046       0.037
+
+  --- dRTauLep ---
+                   bin    actual      binned         GNN
+          0-2              2,573       0.940       0.998
+          2-2              3,762       0.988       1.015
+          2-3              3,624       1.002       1.009
+          3-3              3,480       1.000       0.991
+          3-6              3,859       1.018       0.963
+         RMS deviation                 0.029       0.019
+
+  --- mTauTauVis ---
+                   bin    actual      binned         GNN
+         30-70             4,243       0.962       0.991
+         70-94             4,419       0.974       0.979
+         94-125            3,766       1.033       1.026
+        125-180            3,122       0.966       0.949
+        180-3584           1,749       1.075       1.057
+         RMS deviation                 0.045       0.038
+
+========================================================================
+VERDICT over 8 unused variables: GNN flatter in 8, binned flatter in 0
+========================================================================
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$
+
+Total fold 1 output:
+
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ MODE=softmask EPOCHS=20 ./python/run_fold.sh 1
+=== fold 1 [softmask] : train fold_1 | calibrate fold_2 | apply fold_0 ===
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/lightning/fabric/__init__.py:40: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+Seed set to 42
+CometLogger will be initialized in online mode
+Trainer already configured with model summary callbacks: [<class 'lightning.pytorch.callbacks.model_summary.ModelSummary'>]. Skipping setting a default `ModelSummary` callback.
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+COMET INFO: Experiment is live on comet.com https://www.comet.com/hh-bbtautau-gnn/salt/a9436eb984ef418ba0459abec8b3cc56
+
+----------------------------------------------------------------------------------------------------
+Created training dataset with 2,323,454 entries
+Created validation dataset with 2,320,993 entries
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+Created output dir /home/jjohnstu/summer_2026/fakes-ml-toolkit/logs/GN2_softmask_lephad_fold1_20260813-T013713
+----------------------------------------------------------------------------------------------------
+
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Loading `train_dataloader` to estimate number of stepping batches.
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+
+  | Name            | Type                   | Params
+-----------------------------------------------------------
+0 | model           | SaltModel              | 2.2 M
+1 | model.init_nets | ModuleList             | 20.0 K
+2 | model.tasks     | ModuleList             | 26.9 K
+3 | model.encoder   | TransformerEncoder     | 2.1 M
+4 | model.pool_net  | GlobalAttentionPooling | 129
+5 | norm            | InputNorm              | 0
+-----------------------------------------------------------
+2.2 M     Trainable params
+0         Non-trainable params
+2.2 M     Total params
+8.756     Total estimated model params size (MB)
+Epoch 0: 100%|██████████████████████████████████████████████████████████████████████████████████| 2268/2268 [01:19<00:00, 28.44it/s, v_num=cc56]/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+Epoch 19: 100%|█████████████████████████████████████████████████████████████████████████████████| 2268/2268 [01:45<00:00, 21.47it/s, v_num=cc56]`Trainer.fit` stopped: `max_epochs=20` reached.
+Epoch 19: 100%|█████████████████████████████████████████████████████████████████████████████████| 2268/2268 [01:45<00:00, 21.46it/s, v_num=cc56]
+COMET INFO: Please wait for metadata to finish uploading (timeout is 3600 seconds)
+COMET INFO: Uploading 2 metrics, params and output messages
+run dir: logs/GN2_softmask_lephad_fold1_20260813-T013713
+checkpoint: epoch=017-val_loss=0.02462.ckpt
+
+--- closure (apply fold 0, calibrated on fold 2) ---
+loaded 2,322,744 events from 1 file(s)
+calibration fold: predicted 17,475.6  actual 17,298.2  -> global FF scale = 0.9898
+  (one number, fitted off the apply fold; the SHAPE is untouched)
+
+  category             ptbin  binnedFF    gnnFF   ratio
+  Barrel 1-prong     20-  30     0.218    0.204    0.94
+  Barrel 1-prong     30-  40     0.145    0.140    0.97
+  Barrel 1-prong     40-  50     0.103    0.101    0.98
+  Barrel 1-prong     50-  60     0.080    0.075    0.93
+  Barrel 1-prong     60-  80     0.043    0.057    1.32
+  Barrel 1-prong     80- 100     0.035    0.041    1.15
+  Barrel 1-prong    100- 400     0.011    0.022    2.05
+  Barrel 3-prong     20-  30     0.071    0.071    0.99
+  Barrel 3-prong     30-  40     0.054    0.052    0.97
+  Barrel 3-prong     40-  50     0.041    0.038    0.93
+  Barrel 3-prong     50-  60     0.026    0.027    1.03
+  Barrel 3-prong     60-  80     0.013    0.017    1.27
+  Barrel 3-prong     80- 100     0.010    0.009    0.93
+  Barrel 3-prong    100- 400    -0.001    0.003   -3.35
+  Endcap 1-prong     20-  30     0.204    0.190    0.93
+  Endcap 1-prong     30-  40     0.127    0.132    1.04
+  Endcap 1-prong     40-  50     0.092    0.092    1.01
+  Endcap 1-prong     50-  60     0.096    0.069    0.72
+  Endcap 1-prong     60-  80     0.058    0.051    0.88
+  Endcap 1-prong     80- 100     0.036    0.036    0.99
+  Endcap 1-prong    100- 400     0.013    0.018    1.37
+  Endcap 3-prong     20-  30     0.064    0.066    1.03
+  Endcap 3-prong     30-  40     0.054    0.047    0.87
+  Endcap 3-prong     40-  50     0.030    0.034    1.12
+  Endcap 3-prong     50-  60     0.018    0.024    1.33
+  Endcap 3-prong     60-  80     0.011    0.015    1.35
+  Endcap 3-prong     80- 100     0.006    0.008    1.34
+  Endcap 3-prong    100- 400     0.002    0.003    1.47
+
+  INCLUSIVE closure      predicted   17,080.8   actual   17,447.8   ratio  0.979
+
+  wrote fakefactor_closure_out/fold1/fakefactor_closure_salt_calibrated.png
+
+--- benchmark vs the binned FF ---
+train 2,323,454   calib 2,320,993   apply 2,322,744
+global scale from the validation fold:  binned 1.0078   GNN 0.9898
+  (one constant each, fitted off the apply fold -- shapes untouched)
+
+           INCLUSIVE    actual      binned         GNN
+                        17,448       0.979       0.979
+
+========================================================================
+HOME TURF of the binned method -- it is exact here by construction.
+========================================================================
+
+  --- tau_pt (the binned FF's own axis) ---
+                   bin    actual      binned         GNN
+         20-30             9,463       0.941       0.956
+         30-40             4,049       1.024       0.972
+         40-50             1,886       1.015       0.980
+         50-60             1,019       1.005       0.936
+         60-80               679       1.056       1.205
+         80-100              267       0.992       1.074
+        100-400               87       1.243       2.249
+         RMS deviation                 0.097       0.480
+
+========================================================================
+THE REAL TEST -- variables the binned FF does NOT use.
+A flat column of 1.000 means the method models the fake factor's
+dependence on that variable. The binned method cannot: adding an axis
+would multiply its bins and destroy its statistics.
+========================================================================
+
+  --- mbL ---
+                   bin    actual      binned         GNN
+         19-97             4,776       0.959       0.967
+         97-116            4,580       0.953       0.973
+        116-136            4,195       0.948       0.984
+        136-192            2,818       1.056       1.039
+        192-3526           1,078       1.101       0.880
+         RMS deviation                 0.063       0.060
+
+  --- T1 ---
+                   bin    actual      binned         GNN
+        -27--12            4,814       0.957       0.980
+        -12--9             4,760       0.929       0.967
+         -9-9              3,890       1.023       1.026
+          9-13             2,982       0.986       0.960
+         13-26             1,003       1.135       0.904
+         RMS deviation                 0.072       0.051
+
+  --- mTtau0 ---
+                   bin    actual      binned         GNN
+          0-20             3,680       0.888       1.020
+         20-40             3,863       0.919       0.968
+         40-61             4,069       0.966       0.944
+         61-90             3,779       1.058       0.972
+         90-1843           2,057       1.136       1.009
+         RMS deviation                 0.092       0.033
+
+  --- MET ---
+                   bin    actual      binned         GNN
+          0-29             3,949       1.003       1.000
+         29-45             4,267       0.963       0.950
+         45-63             3,977       0.979       0.979
+         63-90             3,360       0.931       0.958
+         90-1566           1,895       1.051       1.036
+         RMS deviation                 0.043       0.035
+
+  --- HT ---
+                   bin    actual      binned         GNN
+        130-301            4,273       1.036       0.932
+        301-379            4,653       1.011       0.972
+        379-477            4,155       0.919       0.956
+        477-649            2,948       0.944       1.051
+        649-9411           1,419       0.953       1.060
+         RMS deviation                 0.052       0.052
+
+  --- mBB ---
+                   bin    actual      binned         GNN
+        150-175            3,821       1.030       0.972
+        175-208            3,871       0.998       0.969
+        208-254            3,661       1.000       1.001
+        254-338            3,511       0.937       0.972
+        338-6655           2,585       0.903       0.982
+         RMS deviation                 0.054       0.024
+
+  --- dRTauLep ---
+                   bin    actual      binned         GNN
+          0-2              2,784       0.870       0.908
+          2-2              3,907       0.954       0.964
+          2-3              3,570       1.010       1.002
+          3-3              3,327       1.040       1.027
+          3-6              3,861       1.003       0.983
+         RMS deviation                 0.064       0.046
+
+  --- mTauTauVis ---
+                   bin    actual      binned         GNN
+         30-70             4,445       0.899       0.913
+         70-94             4,467       0.963       0.949
+         94-126            3,969       0.973       0.957
+        126-181            2,862       1.063       1.057
+        181-3637           1,705       1.105       1.151
+         RMS deviation                 0.074       0.087
+
+========================================================================
+VERDICT over 8 unused variables: GNN flatter in 6, binned flatter in 2
+========================================================================
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$
+
+Total fold 2 output:
+
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ MODE=softmask EPOCHS=20 ./python/run_fold.sh 2
+=== fold 2 [softmask] : train fold_2 | calibrate fold_0 | apply fold_1 ===
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/lightning/fabric/__init__.py:40: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+Seed set to 42
+CometLogger will be initialized in online mode
+Trainer already configured with model summary callbacks: [<class 'lightning.pytorch.callbacks.model_summary.ModelSummary'>]. Skipping setting a default `ModelSummary` callback.
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+COMET INFO: Experiment is live on comet.com https://www.comet.com/hh-bbtautau-gnn/salt/207930b541d347cc86b3287e948ae827
+
+----------------------------------------------------------------------------------------------------
+Created training dataset with 2,320,993 entries
+Created validation dataset with 2,322,744 entries
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+Created output dir /home/jjohnstu/summer_2026/fakes-ml-toolkit/logs/GN2_softmask_lephad_fold2_20260813-T022144
+----------------------------------------------------------------------------------------------------
+
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Loading `train_dataloader` to estimate number of stepping batches.
+/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+
+  | Name            | Type                   | Params
+-----------------------------------------------------------
+0 | model           | SaltModel              | 2.2 M
+1 | model.init_nets | ModuleList             | 20.0 K
+2 | model.tasks     | ModuleList             | 26.9 K
+3 | model.encoder   | TransformerEncoder     | 2.1 M
+4 | model.pool_net  | GlobalAttentionPooling | 129
+5 | norm            | InputNorm              | 0
+-----------------------------------------------------------
+2.2 M     Trainable params
+0         Non-trainable params
+2.2 M     Total params
+8.756     Total estimated model params size (MB)
+Epoch 0: 100%|██████████████████████████████████████████████████████████████████████████████████| 2266/2266 [01:19<00:00, 28.41it/s, v_num=e827]/home/jjohnstu/summer_2026/fakes-ml-toolkit/conda/envs/salt/lib/python3.11/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+Epoch 19: 100%|█████████████████████████████████████████████████████████████████████████████████| 2266/2266 [01:45<00:00, 21.46it/s, v_num=e827]`Trainer.fit` stopped: `max_epochs=20` reached.
+Epoch 19: 100%|█████████████████████████████████████████████████████████████████████████████████| 2266/2266 [01:45<00:00, 21.45it/s, v_num=e827]
+run dir: logs/GN2_softmask_lephad_fold2_20260813-T022144
+checkpoint: epoch=013-val_loss=0.02454.ckpt
+
+--- closure (apply fold 1, calibrated on fold 0) ---
+loaded 2,323,454 events from 1 file(s)
+calibration fold: predicted 17,054.7  actual 17,447.8  -> global FF scale = 1.0230
+  (one number, fitted off the apply fold; the SHAPE is untouched)
+
+  category             ptbin  binnedFF    gnnFF   ratio
+  Barrel 1-prong     20-  30     0.208    0.214    1.03
+  Barrel 1-prong     30-  40     0.150    0.152    1.02
+  Barrel 1-prong     40-  50     0.114    0.110    0.96
+  Barrel 1-prong     50-  60     0.086    0.078    0.91
+  Barrel 1-prong     60-  80     0.055    0.058    1.04
+  Barrel 1-prong     80- 100     0.040    0.042    1.05
+  Barrel 1-prong    100- 400     0.009    0.024    2.59
+  Barrel 3-prong     20-  30     0.064    0.070    1.11
+  Barrel 3-prong     30-  40     0.056    0.051    0.92
+  Barrel 3-prong     40-  50     0.039    0.037    0.95
+  Barrel 3-prong     50-  60     0.028    0.026    0.93
+  Barrel 3-prong     60-  80     0.013    0.016    1.18
+  Barrel 3-prong     80- 100     0.008    0.009    1.13
+  Barrel 3-prong    100- 400     0.001    0.004    6.73
+  Endcap 1-prong     20-  30     0.188    0.191    1.02
+  Endcap 1-prong     30-  40     0.128    0.134    1.05
+  Endcap 1-prong     40-  50     0.082    0.095    1.16
+  Endcap 1-prong     50-  60     0.070    0.069    0.98
+  Endcap 1-prong     60-  80     0.039    0.050    1.29
+  Endcap 1-prong     80- 100     0.039    0.034    0.86
+  Endcap 1-prong    100- 400     0.017    0.016    0.97
+  Endcap 3-prong     20-  30     0.062    0.061    0.99
+  Endcap 3-prong     30-  40     0.048    0.045    0.93
+  Endcap 3-prong     40-  50     0.026    0.031    1.15
+  Endcap 3-prong     50-  60     0.021    0.021    1.02
+  Endcap 3-prong     60-  80     0.010    0.013    1.35
+  Endcap 3-prong     80- 100     0.001    0.007   10.12
+  Endcap 3-prong    100- 400     0.005    0.003    0.63
+
+  INCLUSIVE closure      predicted   17,554.8   actual   17,093.1   ratio  1.027
+
+  wrote fakefactor_closure_out/fold2/fakefactor_closure_salt_calibrated.png
+
+--- benchmark vs the binned FF ---
+train 2,320,993   calib 2,322,744   apply 2,323,454
+global scale from the validation fold:  binned 1.0191   GNN 1.0230
+  (one constant each, fitted off the apply fold -- shapes untouched)
+
+           INCLUSIVE    actual      binned         GNN
+                        17,093       1.029       1.027
+
+========================================================================
+HOME TURF of the binned method -- it is exact here by construction.
+========================================================================
+
+  --- tau_pt (the binned FF's own axis) ---
+                   bin    actual      binned         GNN
+         20-30             9,001       1.042       1.040
+         30-40             4,132       1.040       0.990
+         40-50             1,904       0.954       1.001
+         50-60             1,002       0.892       0.933
+         60-80               700       1.195       1.131
+         80-100              252       0.892       1.078
+        100-400              104       1.329       1.873
+         RMS deviation                 0.158       0.336
+
+========================================================================
+THE REAL TEST -- variables the binned FF does NOT use.
+A flat column of 1.000 means the method models the fake factor's
+dependence on that variable. The binned method cannot: adding an axis
+would multiply its bins and destroy its statistics.
+========================================================================
+
+  --- mbL ---
+                   bin    actual      binned         GNN
+         18-97             4,529       1.049       1.055
+         97-116            4,426       1.004       1.036
+        116-136            4,306       0.946       0.983
+        136-192            2,876       1.069       1.038
+        192-4234             956       1.300       1.019
+         RMS deviation                 0.141       0.036
+
+  --- T1 ---
+                   bin    actual      binned         GNN
+        -25--12            4,701       1.000       1.044
+        -12--9             4,507       1.006       1.046
+         -9-9              4,098       0.997       0.993
+          9-13             2,891       1.064       1.015
+         13-27               897       1.329       1.038
+         RMS deviation                 0.150       0.034
+
+  --- mTtau0 ---
+                   bin    actual      binned         GNN
+          0-20             3,840       0.873       0.982
+         20-40             3,696       0.994       1.030
+         40-60             3,941       1.026       1.004
+         60-90             3,661       1.120       1.049
+         90-1762           1,956       1.237       1.116
+         RMS deviation                 0.132       0.059
+
+  --- MET ---
+                   bin    actual      binned         GNN
+          0-29             4,041       1.014       0.977
+         29-45             4,201       0.992       0.987
+         45-63             3,958       1.010       1.019
+         63-90             3,082       1.055       1.100
+         90-1388           1,812       1.145       1.125
+         RMS deviation                 0.070       0.073
+
+  --- HT ---
+                   bin    actual      binned         GNN
+        129-301            4,126       1.096       1.019
+        301-379            4,689       1.027       1.015
+        379-477            3,911       1.011       1.055
+        477-649            2,969       0.969       1.031
+        649-6484           1,398       1.016       1.003
+         RMS deviation                 0.048       0.030
+
+  --- mBB ---
+                   bin    actual      binned         GNN
+        150-175            3,868       1.054       1.013
+        175-208            3,708       1.064       1.043
+        208-254            3,480       1.082       1.089
+        254-338            3,486       0.979       1.008
+        338-6424           2,551       0.934       0.967
+         RMS deviation                 0.061       0.047
+
+  --- dRTauLep ---
+                   bin    actual      binned         GNN
+          0-2              2,630       0.944       0.979
+          2-2              3,921       0.965       0.979
+          2-3              3,467       1.070       1.077
+          3-3              3,300       1.077       1.074
+          3-6              3,775       1.074       1.023
+         RMS deviation                 0.064       0.050
+
+  --- mTauTauVis ---
+                   bin    actual      binned         GNN
+         30-70             4,204       0.974       0.993
+         70-94             4,318       1.027       1.027
+         94-126            3,740       1.061       1.054
+        126-181            2,933       1.075       1.065
+        181-2810           1,898       1.019       0.991
+         RMS deviation                 0.047       0.040
+
+========================================================================
+VERDICT over 8 unused variables: GNN flatter in 7, binned flatter in 1
+========================================================================
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$
+
+
+
+8/13/2026:
+
+
