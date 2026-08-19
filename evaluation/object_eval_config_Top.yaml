@@ -1,0 +1,132 @@
+common_config: &common_settings
+  file_pattern: "epoch=(\\d+)-val_loss=([\\d.]+)__(val|test)_(.+)\\.h5"
+  file_block: "objects"
+  train_config: "config.yaml"
+  meta_data: "metadata.yaml"
+  weight_col: "weight"           # makes it to the object output, not sure what it is
+  label_col: "class_label"       # default (should be overriden by each classifier)
+  base_bin_num: 20000
+  base_dir: /lustre/umt3/user/tbaer/HHbbtautau_MVA/trained_models/v06/GNN_v06_hadhad_baseline/
+  fold_dirs:
+    fold_0: GNN_bbtautau_v06_hadhad_run2run3_baseline_rndSeed20_fold0fold3___/
+    fold_1: GNN_bbtautau_v06_hadhad_run2run3_baseline_rndSeed20_fold1fold4___/
+    fold_2: GNN_bbtautau_v06_hadhad_run2run3_baseline_rndSeed20_fold2fold0___/
+    fold_3: GNN_bbtautau_v06_hadhad_run2run3_baseline_rndSeed20_fold3fold1___/
+    fold_4: GNN_bbtautau_v06_hadhad_run2run3_baseline_rndSeed20_fold4fold2___/
+
+columns: &columns
+  s_hasHiggsParent: "{model_name}_phasHiggsParent"
+  b_hasHiggsParent: "{model_name}_pnotHiggsParent"
+  s_hasTopParent: "{model_name}_phasTopParent"
+  b_hasTopParent: "{model_name}_pnotTopParent"
+    #s_hasZParent: "{model_name}_phasZParent"
+    #b_hasZParent: "{model_name}_pnotZParent"
+  isTau: "isTau"
+    #isLepton: "isLepton"
+  isBjet: "isBjet"
+  isJet: "isJet"
+  sample_name: "sample_name"
+
+input_data:
+  - <<: *common_settings
+    label_col: "hasTopParent"
+    classifiers:
+      "GNN v06: Tau TopParent":
+        columns: *columns
+        expression: "2 / (1 + (b_hasTopParent)/s_hasTopParent) - 1"
+        selection: "(isTau == 1)"
+        split_train_test_val: True
+        score_plot_config:
+          train: { "type": "hist", "histtype": "stepfilled", "linewidth": 2 }
+          val:   { "type": "hist", "histtype": "step",       "linewidth": 2, "linestyle": "--" }
+          test:  { "type": "marker", "marker": "o", "markersize": 8, "linestyle": "None" }
+        score_plot_color: "#ff7f0e"
+
+  - <<: *common_settings
+    label_col: "hasTopParent"
+    classifiers:
+      "GNN v06: Bjet TopParent":
+        columns: *columns
+        expression: "2 / (1 + (b_hasTopParent)/s_hasTopParent) - 1"
+        selection: "(isBjet == 1)"
+        split_train_test_val: True
+        score_plot_config:
+          train: { "type": "hist", "histtype": "stepfilled", "linewidth": 2 }
+          val:   { "type": "hist", "histtype": "step",       "linewidth": 2, "linestyle": "--" }
+          test:  { "type": "marker", "marker": "o", "markersize": 8, "linestyle": "None" }
+        score_plot_color: "#d62728"
+
+  #- <<: *common_settings
+  #  label_col: "hasHiggsParent"
+  #  classifiers:
+  #    "GNN v06: Jet HiggsParent":
+  #      columns: *columns
+  #      expression: "2 / (1 + (b_hasHiggsParent)/s_hasHiggsParent) - 1"
+  #      selection: "(isJet == 1)"
+  #      split_train_test_val: True
+  #      score_plot_config:
+  #        train: { "type": "hist", "histtype": "stepfilled", "linewidth": 2 }
+  #        val:   { "type": "hist", "histtype": "step",       "linewidth": 2, "linestyle": "--" }
+  #        test:  { "type": "marker", "marker": "o", "markersize": 8, "linestyle": "None" }
+  #      score_plot_color: "#8DAFAB"
+
+  - <<: *common_settings
+    label_col: "hasTopParent"
+    classifiers:
+      "GNN v06: Jet TopParent":
+        columns: *columns
+        expression: "2 / (1 + (b_hasTopParent)/s_hasTopParent) - 1"
+        selection: "(isJet == 1)"
+        split_train_test_val: True
+        score_plot_config:
+          train: { "type": "hist", "histtype": "stepfilled", "linewidth": 2 }
+          val:   { "type": "hist", "histtype": "step",       "linewidth": 2, "linestyle": "--" }
+          test:  { "type": "marker", "marker": "o", "markersize": 8, "linestyle": "None" }
+        score_plot_color: "#F48892"
+
+          #- <<: *common_settings
+          #  label_col: "hasTopParent"
+          #  classifiers:
+          #    "GNN v06: Lepton TopParent":
+          #      columns: *columns
+          #      expression: "2 / (1 + (b_hasTopParent)/s_hasTopParent) - 1"
+          #      selection: "(isLepton == 1)"
+          #      split_train_test_val: True
+          #      score_plot_config:
+          #        train: { "type": "hist", "histtype": "stepfilled", "linewidth": 2 }
+          #        val:   { "type": "hist", "histtype": "step",       "linewidth": 2, "linestyle": "--" }
+          #        test:  { "type": "marker", "marker": "o", "markersize": 8, "linestyle": "None" }
+          #      score_plot_color: "#F48892"
+
+include_roc: True
+include_roc_inverse: True
+include_score_distribution: True
+include_score_distribution_trafo: False
+
+roc:
+  drop_negative_weights: True
+  figure_size: [10, 8]
+  roc_range: [0.1, 1.0]
+  reference_dataset: 'test'
+  reference_classifier: "GNN v06: Bjet TopParent"
+  reference_fold: 'fold_0'
+
+score_distribution:
+  x_min: 0       # if expression is "s"; set to -1..1 if you use "2*s - 1"
+  x_max: 1
+  figure_size: [10, 12]
+  bin_num: 25
+  y_log: True
+  reference_dataset: 'test'
+  baseline_classifier: "GNN v06: Bjet TopParent"
+  ratio_pulls: False
+  fold_colors:
+    fold_0: "#F48892"
+    fold_1: "#91CAE8"
+    fold_2: "#8DAFAB"
+  fold_reference: "fold_0"
+  category:
+    0: { name: "no Top Parent", color: "#000080", linestyle: "--", linewidth: 3 }
+    1: { name: "has Top Parent",     color: "#B22222", linestyle: "-",  linewidth: 3 }
+  trafo:
+    use_hhard_binning: False

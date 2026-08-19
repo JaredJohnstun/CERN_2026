@@ -62,6 +62,41 @@ configs/GN2_softmask_lephad_fold0.yaml
 
 the softmask approach gives the data event a fractional weight representing how much it should contribute to the fake population.
 
+The original problem: we want fake taus
+Your collision data in the fake control region aren't pure jet→τ fakes. They contain the fake-τ contribution you want plus contamination from real/e-fake τ candidates.
+In S1, you estimated the fake yield using ordinary signed subtraction:
+
+Nfake​=Ndata​−NMC​
+
+In terms of event weights, data contributes +cw and MC contributes −cw. That works for measuring yields, but it means you'd have negative event weights if you directly used the same approach to train the classifier.
+
+What softmask subtraction does:
+Instead, Shahzad's softmask method trains a separate subtraction classifier that estimates, for each data event, a quantity ρ(x) associated with the real/e-fake contamination. It then constructs:
+
+w(softmask​)=cw[1−ρ(x)].   (cw) -> combined weight
+
+So rather than saying:
+
+DATA event → +weight
+MC event   → -weight
+
+you're effectively saying:
+
+DATA event → keep some fraction of its weight,
+             based on how much it looks like the
+             fake population
+
+MC event   → training weight = 0
+
+The important part is that the resulting softmask_weight values are nonnegative. That's exactly what your output confirmed:
+all weights >= 0: True
+for all three folds.
+
+We want soft/signed ​≈1
+because that means the softmask subtraction reproduces the same estimated fake yield that the standard signed data−MC subtraction gives us.
+The advantage is that softmask training uses nonnegative weights, avoiding the instability that negative event weights can cause in the training loss.
+
+
 Also, running this:
 (salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ MODE=softmask EPOCHS=20 ./python/run_fold.sh 0
 
@@ -682,6 +717,146 @@ VERDICT over 8 unused variables: GNN flatter in 7, binned flatter in 1
 
 
 
-8/13/2026:
+8/14/2026:
+
+S3: first running make_softmask_weights.py script. Run command from fakes-ml-toolkit directory:
+
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ python python/make_softmask_weights.py --dry-run $PP
+
+Output:
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ python python/make_softmask_weights.py --dry-run $PP
+loaded: fold0 2,322,744, fold1 2,323,454, fold2 2,320,993
+features: 17  (pTHH, mHH, mBB, MET, mbL, mTauTauVis, pTTauTauVis, T1, mTtau0, HT, dRTauLep, dRBB, dPhiTauTauMET, dEtaHH, tau_pt, tau_eta, tau_prong)
+subtraction classifier: NN, 15 epochs, device=cpu
+
+fold 0: rho trained on folds [1, 2]
+   ID    : alpha 0.613   signed fake     17,448   soft-mask     17,208   ratio 0.986
+   antiID: alpha 0.060   signed fake    229,780   soft-mask    230,511   ratio 1.003
+   -> fold 0 inclusive FF (soft-mask) 0.0746   all weights >= 0: True
+
+fold 1: rho trained on folds [0, 2]
+   ID    : alpha 0.610   signed fake     17,093   soft-mask     17,768   ratio 1.039
+   antiID: alpha 0.060   signed fake    229,274   soft-mask    228,767   ratio 0.998
+   -> fold 1 inclusive FF (soft-mask) 0.0777   all weights >= 0: True
+
+fold 2: rho trained on folds [0, 1]
+   ID    : alpha 0.612   signed fake     17,298   soft-mask     17,597   ratio 1.017
+   antiID: alpha 0.060   signed fake    228,967   soft-mask    229,522   ratio 1.002
+   -> fold 2 inclusive FF (soft-mask) 0.0767   all weights >= 0: True
+
+--dry-run: nothing written.
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$
+
+Here we are tasked with comparing the Softmask subtraction to the Signed data-MC subtraction in bins of 
+mTtau0, mbL, and MET. Shahzad wants to do this separately for the ID and antiID regions. For reference:
+    -mTtau0 -> Transverse mass of leading Tau candidate
+    -mbL -> invariant mass of a bjet and lepton system
+    -MET -> Missing Energy Transverse (How much of the picture we see)
+
+    We want the ratio to be close to one to verify that the softmask
+    will reproduce the same estimated fake yield that the signed subtraction produces.
+
+We need to know what bins to pick, we can find some statistical information by running the following:
+
+python - <<'PY'
+> import h5py
+> import numpy as np
+> import glob
+>
+> PP = "/home/shahzad/ML_Fakes_LepHad/inputData/preprocessed"
+>
+> ev = np.concatenate([
+>     h5py.File(f, "r")["events"][:]
+>     for f in sorted(glob.glob(f"{PP}/fold_*/fakeCR.h5"))
+> ])
+>
+> for var in ("mTtau0", "mbL", "MET"):
+>     x = ev[var]
+>     print(
+>         f"{var:8s} "
+>         f"min={np.nanmin(x):8.2f}  "
+>         f"p10={np.nanpercentile(x,10):8.2f}  "
+>         f"p25={np.nanpercentile(x,25):8.2f}  "
+>         f"median={np.nanmedian(x):8.2f}  "
+>         f"p75={np.nanpercentile(x,75):8.2f}  "
+>         f"p90={np.nanpercentile(x,90):8.2f}  "
+>         f"max={np.nanmax(x):8.2f}"
+>     )
+> PY
+and it outputs for us:
+
+mTtau0   min=    0.00  p10=   10.00  p25=   24.85  median=   49.59  p75=   80.70  p90=  121.00  max= 1942.71
+mbL      min=   18.36  p10=   83.60  p25=  102.12  median=  125.34  p75=  168.13  p90=  267.41  max= 4233.68
+MET      min=    0.01  p10=   19.67  p25=   33.25  median=   53.49  p75=   81.11  p90=  119.64  max= 2281.06
+
+so given the script I placed at:
+fakes-ml-toolkit/python:
+
+I got the following:
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ python python/check_softmask_closure.py
+
+ID — mTtau0
+            bin       signed         soft    soft/signed
+     0-20          11243.3      11232.7          0.999
+    20-40          11723.7      11964.1          1.021
+    40-60          11499.0      11610.9          1.010
+    60-90          11249.8      11271.4          1.002
+    90-130          4682.7       4700.3          1.004
+   130-200          1347.5       1359.7          1.009
+   200-2000           93.1        150.0          1.610
+
+ID — mbL
+            bin       signed         soft    soft/signed
+    20-80           5793.4       5774.3          0.997
+    80-100         10332.4      10737.2          1.039
+   100-120         14387.4      14689.7          1.021
+   120-150         14494.3      14836.5          1.024
+   150-200          4272.2       3848.8          0.901
+   200-300          2001.1       1829.4          0.914
+   300-4500          556.3        572.3          1.029
+
+ID — MET
+            bin       signed         soft    soft/signed
+     0-20           6196.0       6207.7          1.002
+    20-35          10428.0      10190.8          0.977
+    35-50          11938.4      11471.7          0.961
+    50-70          11813.6      11935.8          1.010
+    70-100          7555.1       8079.3          1.069
+   100-150          2975.5       3352.7          1.127
+   150-2500          932.6       1051.1          1.127
+
+antiID — mTtau0
+            bin       signed         soft    soft/signed
+     0-20         107392.7     106946.1          0.996
+    20-40         119997.6     119641.5          0.997
+    40-60         128035.8     127830.0          0.998
+    60-90         157967.3     157870.8          0.999
+    90-130        102290.3     102258.4          1.000
+   130-200         53652.7      53608.4          0.999
+   200-2000        18684.4      18688.5          1.000
+
+antiID — mbL
+            bin       signed         soft    soft/signed
+    20-80          60172.1      60250.3          1.001
+    80-100        118637.6     118745.3          1.001
+   100-120        179927.7     179989.9          1.000
+   120-150        203848.5     203598.1          0.999
+   150-200         67791.5      67476.2          0.995
+   200-300         38973.6      38448.7          0.987
+   300-4500        18668.9      18334.2          0.982
+
+antiID — MET
+            bin       signed         soft    soft/signed
+     0-20          78997.9      78521.6          0.994
+    20-35         134814.7     134288.4          0.996
+    35-50         149869.6     149560.9          0.998
+    50-70         156276.4     156158.5          0.999
+    70-100        102136.7     102331.5          1.002
+   100-150         46841.3      46978.7          1.003
+   150-2500        19084.2      19004.2          0.996
+
+With plots generated in a separate directory.
+
+remember cw and what it is
 
 
