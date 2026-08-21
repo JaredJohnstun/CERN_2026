@@ -859,4 +859,110 @@ With plots generated in a separate directory.
 
 remember cw and what it is
 
+8/19/2026:
+
+I have done more work on S3 and the graphed outputs, refining the graphs. The following has been changed:
+-Error bars now exist on all the graphs
+-The graphs now share a common y scale for easier reference and interpretation
+-event counts for each bin are on each graph
+
+Running the script outputs the following table now:
+
+
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ python python/check_softmask_closure.py
+
+ID — mTtau0
+            bin     N events       signed         soft    soft/signed     stat err
+     0-20          739,990      11243.3      11232.7          0.999        0.017
+    20-40          732,586      11723.7      11964.1          1.021        0.017
+    40-60          642,368      11499.0      11610.9          1.010        0.016
+    60-90          628,055      11249.8      11271.4          1.002        0.016
+    90-130         325,407       4682.7       4700.3          1.004        0.027
+   130-200         139,846       1347.5       1359.7          1.009        0.056
+   200-2000         39,437         93.1        150.0          1.610        0.580
+
+ID — mbL
+            bin     N events       signed         soft    soft/signed     stat err
+    20-80          310,789       5793.4       5774.3          0.997        0.023
+    80-100         593,806      10332.4      10737.2          1.039        0.019
+   100-120         816,518      14387.4      14689.7          1.021        0.015
+   120-150         855,537      14494.3      14836.5          1.024        0.015
+   150-200         302,385       4272.2       3848.8          0.901        0.023
+   200-300         229,716       2001.1       1829.4          0.914        0.033
+   300-4500        138,936        556.3        572.3          1.029        0.077
+
+ID — MET
+            bin     N events       signed         soft    soft/signed     stat err
+     0-20          265,865       6196.0       6207.7          1.002        0.021
+    20-35          462,969      10428.0      10190.8          0.977        0.016
+    35-50          559,066      11938.4      11471.7          0.961        0.015
+    50-70          691,807      11813.6      11935.8          1.010        0.016
+    70-100         646,359       7555.1       8079.3          1.069        0.024
+   100-150         424,609       2975.5       3352.7          1.127        0.046
+   150-2500        197,014        932.6       1051.1          1.127        0.086
+
+antiID — mTtau0
+            bin     N events       signed         soft    soft/signed     stat err
+     0-20          657,804     107392.7     106946.1          0.996        0.004
+    20-40          690,588     119997.6     119641.5          0.997        0.004
+    40-60          691,516     128035.8     127830.0          0.998        0.004
+    60-90          786,120     157967.3     157870.8          0.999        0.004
+    90-130         496,332     102290.3     102258.4          1.000        0.004
+   130-200         277,888      53652.7      53608.4          0.999        0.006
+   200-2000        119,254      18684.4      18688.5          1.000        0.010
+
+antiID — mbL
+            bin     N events       signed         soft    soft/signed     stat err
+    20-80          245,693      60172.1      60250.3          1.001        0.006
+    80-100         446,674     118637.6     118745.3          1.001        0.004
+   100-120         674,788     179927.7     179989.9          1.000        0.003
+   120-150         859,460     203848.5     203598.1          0.999        0.003
+   150-200         574,109      67791.5      67476.2          0.995        0.005
+   200-300         534,514      38973.6      38448.7          0.987        0.007
+   300-4500        384,261      18668.9      18334.2          0.982        0.010
+
+antiID — MET
+            bin     N events       signed         soft    soft/signed     stat err
+     0-20          452,723      78997.9      78521.6          0.994        0.005
+    20-35          711,123     134814.7     134288.4          0.996        0.004
+    35-50          743,189     149869.6     149560.9          0.998        0.004
+    50-70          769,957     156276.4     156158.5          0.999        0.004
+    70-100         567,379     102136.7     102331.5          1.002        0.004
+   100-150         309,379      46841.3      46978.7          1.003        0.007
+   150-2500        165,752      19084.2      19004.2          0.996        0.010
+
+8/20/2026:
+S4: Plotting Validation Loss per Epoch
+
+My script called plot_val_loss.py takes in an argument of the run folder in the logs directory, and outputs a graph of the validation loss vs epoch for that training. I have run it on all 3 folds, and the total output was below:
+
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ python python/plot_val_loss.py logs/GN2_softmask_lephad_fold0_20260813-T004341/
+
+Run: GN2_softmask_lephad_fold0_20260813-T004341
+Epochs found: 20
+Best epoch: 15
+Minimum val_loss: 0.02397
+All losses positive: True
+Training status: HEALTHY
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ python python/plot_val_loss.py logs/GN2_softmask_lephad_fold1_20260813-T013713/
+
+Run: GN2_softmask_lephad_fold1_20260813-T013713
+Epochs found: 20
+Best epoch: 17
+Minimum val_loss: 0.02462
+All losses positive: True
+Training status: HEALTHY
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ python python/plot_val_loss.py logs/GN2_softmask_lephad_fold2_20260813-T022144/
+
+Run: GN2_softmask_lephad_fold2_20260813-T022144
+Epochs found: 20
+Best epoch: 13
+Minimum val_loss: 0.02454
+All losses positive: True
+Training status: HEALTHY
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$
+
+S5:
+Some changes need to be made to run_fold.sh in order to check that the training doesn't have a strong seed dependence. We are making the following changes:
+
 
