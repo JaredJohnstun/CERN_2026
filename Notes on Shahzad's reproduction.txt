@@ -1397,3 +1397,14 @@ Shahzad wants to use this method for the Run3 analysis
 Shahzad says implementation has already been done
 	-Finish S5 and Markdown report
 	-Get started on posted -> view CMS poster
+
+8/25/2026: Compiling the outputs from the seeded trainings:
+Variable	Seed 42	Seed 123	Seed 999	Binned FF
+mbL	        0.032	0.027	       0.030	0.139
+T1	        0.029	0.030	       0.032	0.130
+mTtau0	    0.037	0.032	       0.031	0.091
+
+These are all better RMS values than in the binned method, so we can conclude that the improvements do not soley depend on the seed values. In other words, the improvement is stable across seeds
+The GNN's improvement in mbL, T1, and mTtau0 is stable under changes in the random training seed; it is not an artifact of the original seed-42 initialization.
+
+There will be a separate file for the Markdown Report. This marks the EOF for these notes.
