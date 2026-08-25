@@ -7,6 +7,26 @@ command on using python {PP} doesn't work
 
 S1 Sentence(s):
 The signed fake factor weights are subtracting the simulated data that you don't want contributing to your results, so positive weights are for real data and negative weights are for simulated data. The Fake Factor is the ratio of ID yields to anti-ID yields because it yields a mapping of the antiID fake yields onto the ID region. In other words, it is a prediction of how many fake taus may end up in the ID region.
+Output:
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$ python python/validate_fakeFactor.py $PP
+folds      : 3  (2322744, 2323454, 2320993)
+events     : 6,967,191
+weight     : data=+cw True | MC=-cw True | zero-weight 0
+
+                 data      MC sub  fake yield                published
+ID            133,484      81,645      51,839      133,482     81,637
+antiID        732,107      44,086     688,021      731,629     44,040
+
+inclusive FF : 0.0753   published 0.0754   deviation -0.07%
+
+category              20-30    30-40    40-50    50-60    60-80   80-100  100-400
+Barrel 1-prong        0.210    0.147    0.104    0.079    0.053    0.038    0.012
+Barrel 3-prong        0.067    0.056    0.039    0.027    0.015    0.009   -0.001
+Endcap 1-prong        0.196    0.131    0.089    0.075    0.047    0.030    0.015
+Endcap 3-prong        0.064    0.049    0.029    0.020    0.009    0.003    0.004
+
+OK: reproduces the published binned fake factor to 0.07% -- inputs are sound, cleared to train.
+(salt) [jjohnstu@shahzad-9 fakes-ml-toolkit]$
 
 S2:
 As an aside: Difference in training files:
