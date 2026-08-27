@@ -552,19 +552,36 @@ for region, rsel in (
 
 ![ID mTtau0 closure](plots/softmask_closure/softmask_ID_mTtau0.png)
 
+**Verdict:** The first six bins are excellent: 0.999, 1.021, 1.010, 1.002, 1.004, 1.009. They're all within about 2% of unity. The last bin jumps to 1.610, but this is the extreme tail and has very low statistics compared with the other bins. The error bars showed that this point has a correspondingly large statistical uncertainty. So I would classify this as good closure overall, with a statistically limited final-bin excursion rather than convincing evidence of a shape problem.
+
 ![ID mbL closure](plots/softmask_closure/softmask_ID_mbL.png)
 
+**Verdict:** The first four bins are also quite good: 0.997, 1.039, 1.021, 1.024. Then we get 0.901 and 0.914 in the 150–200 and 200–300 bins, followed by 1.029 in the tail. These middle/high-mbL deviations are more interesting than the single mTtau0 tail spike because there are two neighboring bins showing the same downward behavior. So the verdict is generally good closure, but with evidence of a modest shape discrepancy around 150–300 GeV. We shouldn't dismiss those automatically as statistics.
+
 ![ID MET closure](plots/softmask_closure/softmask_ID_MET.png)
+
+**Verdict:** This is the clearest shape trend. The ratios progress as 1.002, 0.977, 0.961, 1.010, 1.069, 1.127, 1.127. The important feature isn't simply that the final bins are 12.7% high; it's that the ratio systematically rises as MET increases after the middle of the distribution. Multiple neighboring bins move in the same direction. So I'd call this reasonable overall closure but a visible high-MET shape dependence that is unlikely to be explained solely by one low-statistics tail bin.
 
 ### anti-ID Region
 
 ![anti-ID mTtau0 closure](plots/softmask_closure/softmask_antiID_mTtau0.png)
 
+**Verdict:** 0.996–1.000 across every bin. That's essentially perfect closure.
+
 ![anti-ID mbL closure](plots/softmask_closure/softmask_antiID_mbL.png)
+
+**Verdict:** Mostly 0.999–1.001 through the bulk, then 0.995, 0.987, 0.982 toward higher mbL. There is a slight downward trend in the tail, but even the largest deviation is only about 1.8%. So this is very good closure, with only a small high-mbL residual.
 
 ![anti-ID MET closure](plots/softmask_closure/softmask_antiID_MET.png)
 
+**Verdict:** 0.994, 0.996, 0.998, 0.999, 1.002, 1.003, 0.996. Again, excellent. Every bin is within roughly 0.6% of unity, with no meaningful shape trend apparent.
 
 ## S4 - Validation-Loss Stability
+For Step 4 we want to inspect the validation loss as training progresses through the epochs. We are asking the question:
+"Does the model learn and settle onto a stable validation-loss plateau, or does validation behavior show signs of instability/divergence?"
+This matters because a good final benchmark isn't very reassuring if the underlying training itself is unstable.
+
+<details>
+<summary>plot_val_loss.py</summary>
 
 ## S5 - Random-Seed Stability
