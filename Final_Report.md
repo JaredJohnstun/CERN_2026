@@ -583,5 +583,112 @@ This matters because a good final benchmark isn't very reassuring if the underly
 
 <details>
 <summary>plot_val_loss.py</summary>
+ 
+```python
+"""Script to plot validation loss per epoch"""
+import sys
+import os
+import re
+import matplotlib.pyplot as plt
+
+#Check run directory was provided to grab data from
+if len(sys.argv) != 2:
+    print(f"Usage: python {sys.argv[0]} <run_dir>")
+    sys.exit(1)
+#Set some needed variables
+run_dir = sys.argv[1]
+ckpt_dir = os.path.join(run_dir, "ckpts")
+run_name = os.path.basename(os.path.normpath(run_dir))
+
+
+#Make output directory
+OUTDIR = "plots/validation_loss"
+os.makedirs(OUTDIR, exist_ok=True)
+
+#Used when saving graph
+out_path = os.path.join(
+    OUTDIR,
+    f"{run_name}_val_loss.png"
+)
+
+#regualar expression converted to string to search directories
+#Regex will grab all epoch files, not just lowest loss
+pattern = re.compile( r"epoch=(\d+)-val_loss=([0-9.]+)\.ckpt$")
+
+#arrays to capture parsing
+epochs = []
+losses = []
+
+#loop for capture
+for name in os.listdir(ckpt_dir):
+    #re.match checks for matching expression from start of string
+    #This returns a boolean
+    match = pattern.match(name)
+
+    if match:
+        #Capture values if present
+        epoch = int(match.group(1))
+        loss = float(match.group(2))
+
+        #append to arrays
+        epochs.append(epoch)
+        losses.append(loss)
+
+#Combine epochs and losses into 1 iterable
+#Then sort by epoch
+pairs = sorted(zip(epochs, losses))
+
+#separate them again so they're ready for plotting
+#This is done because we don't assume the order the files are in within the directory
+epochs, losses = zip(*pairs)
+#grab the index that contains the lowest loss epoch
+best_i = losses.index(min(losses))
+
+#grab the values of the lowest loss epoch
+best_epoch = epochs[best_i]
+best_loss = losses[best_i]
+all_positive = all(loss > 0 for loss in losses)
+
+#Print report to the screen
+print(f"\nRun: {run_name}")
+print(f"Epochs found: {len(epochs)}")
+print(f"Best epoch: {best_epoch}")
+print(f"Minimum val_loss: {best_loss:.5f}")
+print(f"All losses positive: {all_positive}")
+if all_positive:
+    print("Training status: HEALTHY")
+else:
+    print("Training status: NOT HEALTHY")
+
+#plot values
+plt.figure(figsize=(8, 5))
+plt.plot(epochs, losses, marker='o')
+plt.xticks(epochs)
+plt.xlabel('Epochs')
+plt.ylabel('Validation Loss')
+plt.title(f"Validation Loss vs Epoch - {run_name}")
+plt.tight_layout()
+plt.savefig(out_path)
+
+```
+</details>
+
+### Fold 0
+
+![Fold 0 validation loss](plots/validation_loss/GN2_softmask_lephad_fold0_20260813-T004341_val_loss.png)
+
+**Verdict:** 
+
+### Fold 1
+
+![Fold 1 validation loss](plots/validation_loss/GN2_softmask_lephad_fold1_20260813-T013713_val_loss.png)
+
+**Verdict:** ...
+
+### Fold 2
+
+![Fold 2 validation loss](plots/validation_loss/GN2_softmask_lephad_fold2_20260813-T022144_val_loss.png)
+
+**Verdict:** ...
 
 ## S5 - Random-Seed Stability
