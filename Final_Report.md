@@ -336,8 +336,10 @@ The softmask GNN benchmark comparisons for folds 0, 1, and 2 can be seen below:
 
 ## S3 - Softmask Closure Check
 This step compares the Softmask subtraction to the Signed Data-MC subtraction in bins of mTtau0, mbL, and MET. We need to answer the question:
+
 "Does the new postive-weight softmask reproduce the fake distribution that the original signed subtraction gave us?"
-For this, a ratio of soft-to-signed means perfect closure, or perfect recreation. Ideally, the ration should be consistent with 1.0 within statistical uncertainty
+
+For this, a ratio of soft-to-signed of 1.0 means perfect closure, or perfect recreation. Ideally, the ration should be consistent with 1.0 within statistical uncertainty
 
 <details>
  <summary>Full check_softmask_closure.py script</summary>
@@ -578,7 +580,9 @@ for region, rsel in (
 
 ## S4 - Validation-Loss Stability
 For Step 4 we want to inspect the validation loss as training progresses through the epochs. We are asking the question:
+
 "Does the model learn and settle onto a stable validation-loss plateau, or does validation behavior show signs of instability/divergence?"
+
 This matters because a good final benchmark isn't very reassuring if the underlying training itself is unstable.
 
 <details>
@@ -677,18 +681,44 @@ plt.savefig(out_path)
 
 ![Fold 0 validation loss](plots/validation_loss/GN2_softmask_lephad_fold0_20260813-T004341_val_loss.png)
 
-**Verdict:** 
+**Verdict:** Training appears healthy. The validation loss decreases rapidly during the early epochs before settling into a stable plateau. The minimum validation loss of 0.02397 occurs at epoch 15, with no evidence of divergence afterward.
 
 ### Fold 1
 
 ![Fold 1 validation loss](plots/validation_loss/GN2_softmask_lephad_fold1_20260813-T013713_val_loss.png)
 
-**Verdict:** ...
+**Verdict:** Training appears healthy. Validation loss decreases during the early stages of training and then remains stable with only small epoch-to-epoch fluctuations. There is no indication of runaway or unstable behavior.
 
 ### Fold 2
 
 ![Fold 2 validation loss](plots/validation_loss/GN2_softmask_lephad_fold2_20260813-T022144_val_loss.png)
 
-**Verdict:** ...
+**Verdict:** Training appears healthy. The validation loss improves early in training before reaching a stable plateau. Later epochs remain close to this plateau without evidence of divergence.
 
 ## S5 - Random-Seed Stability
+For Step 5 we need to ensure that all the observed improvements do not arise from a specific training seed. In other words, we are answering the question:
+
+"Did we get lucky with seed 42?"
+
+In order to verify this, we can rerun fold 0 with different seeds to test this. The first table below has a summary of each training run, and the second table below has the RMS values of a few variables for each seed.
+
+###Table of Seed Summaries:
+| Seed | Best Epoch | Min. val_loss | Inclusive Closure | GNN Flatter | Binned Flatter |
+|---:|---:|---:|---:|---:|---:|
+| 42 | 15 | 0.02397 | 0.993 | 8 | 0 |
+| 123 | 11 | 0.02399 | 0.994 | 7 | 1 |
+| 999 | 13 | 0.02396 | 0.994 | 7 | 1 |
+
+###Table of Variable RMS Values:
+| Variable | Seed 42 | Seed 123 | Seed 999 |
+|---|---:|---:|---:|
+| mbL | 0.032 | 0.027 | 0.030 |
+| T1 | 0.029 | 0.030 | 0.032 |
+| mTtau0 | 0.037 | 0.032 | 0.031 |
+| MET | 0.062 | 0.059 | 0.061 |
+| HT | 0.036 | 0.070 | 0.045 |
+| mBB | 0.037 | 0.034 | 0.038 |
+| dRTauLep | 0.019 | 0.022 | 0.044 |
+| mTauTauVis | 0.038 | 0.036 | 0.036 |
+
+**Conclusion:** The softmask GNN result is stable with respect to the random seed. Although individual variable RMS deviations fluctuate between trainings, all three seeds reach nearly identical minimum validation losses and inclusive closure, and the GNN remains flatter than the binned method for most unused variables in every run. Therefore, the improvement seen with the GNN does not appear to be an artifact of a particular random initialization.
