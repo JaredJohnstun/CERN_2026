@@ -702,14 +702,14 @@ For Step 5 we need to ensure that all the observed improvements do not arise fro
 
 In order to verify this, we can rerun fold 0 with different seeds to test this. The first table below has a summary of each training run, and the second table below has the RMS values of a few variables for each seed.
 
-###Table of Seed Summaries:
+### Table of Seed Summaries:
 | Seed | Best Epoch | Min. val_loss | Inclusive Closure | GNN Flatter | Binned Flatter |
 |---:|---:|---:|---:|---:|---:|
 | 42 | 15 | 0.02397 | 0.993 | 8 | 0 |
 | 123 | 11 | 0.02399 | 0.994 | 7 | 1 |
 | 999 | 13 | 0.02396 | 0.994 | 7 | 1 |
 
-###Table of Variable RMS Values:
+### Table of Variable RMS Values:
 | Variable | Seed 42 | Seed 123 | Seed 999 |
 |---|---:|---:|---:|
 | mbL | 0.032 | 0.027 | 0.030 |
